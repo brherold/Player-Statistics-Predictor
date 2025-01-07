@@ -19,6 +19,7 @@ from pygetPlayerSkills import get_player_info
 
 df = pd.read_csv("DataCSVS/cleanedPlayerData41-42.csv", encoding='latin1')
 
+
 def preprocess_and_predict(player, scaler, pca, model, expected_columns):
     # Convert player data to DataFrame
     player_df = pd.DataFrame([player])
@@ -88,11 +89,13 @@ def finishing(df, playerLink):
     return float(getStat(X_train, X_test, y_train, y_test, playerLink))
 
 def insideShot(position, df, playerLink):
-    df = df[(df['IS-A'] >= 100)]
+    #df = df[(df['IS-A'] >= 100)]
     
     if position == "Perimeter":
+        df = df[(df['IS-A'] >= 75)]
         df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
     else:
+        df = df[(df['IS-A'] >= 100)]
         df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
