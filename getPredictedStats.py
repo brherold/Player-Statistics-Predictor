@@ -1,23 +1,9 @@
-
-#Input the player's name, position (Perimeter or Big), and URL and get their predicted stats for the season
-
 import pandas as pd
-import numpy as np
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import seaborn as sns; sns.set()
-
-from sklearn.model_selection import train_test_split,GridSearchCV
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
-from sklearn.linear_model import Ridge
-from sklearn.decomposition import PCA
-
-from sklearn.feature_selection import RFE
 from pygetPlayerSkills import get_player_info
 
+import joblib
 
-df = pd.read_csv("DataCSVS/cleanedPlayerData41-42.csv", encoding='latin1')
+
 
 
 def preprocess_and_predict(player, scaler, pca, model, expected_columns):
@@ -41,293 +27,66 @@ def preprocess_and_predict(player, scaler, pca, model, expected_columns):
     # Predict using the model
     prediction = model.predict(player_pca)
     
-    return prediction
-
-def getStat(X_train, X_test, y_train, y_test, playerLink):
-    # Standardize the training and test data
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-
-    # Apply PCA to retain 95% of variance
-    pca = PCA(n_components=0.95)
-    X_train_pca = pca.fit_transform(X_train_scaled)
-    X_test_pca = pca.transform(X_test_scaled)
-
-    # Train Ridge Regression model
-    model = Ridge()
-    model.fit(X_train_pca, y_train)
-
-    # Make predictions on the test set for evaluation
-    y_pred = model.predict(X_test_pca)
-
-    # Get the player info
-    player = get_player_info(playerLink)
-
-    # Use preprocess_and_predict to get the prediction for the new player
-    prediction = preprocess_and_predict(player, scaler, pca, model, X_train.columns)
-    
     return prediction[0]
 
 
 
-def finishing(df, playerLink):
-    df = df[(df['F-A'] >= 30)]  # attempted ~ 2 3PA a game
-    df = df[df['2OFA'] >= 100]
+scaler, pca, model, expected_columns = joblib.load(f'Models-NoD/FIN.pkl')
 
-    columns_to_drop = ['F-M', 'F-A', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+#print(scaler)
+#print(joblib.load(f'Models-NoD/FIN.pkl')[0])
 
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('F%', axis=1)
-    y = data['F%']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def insideShot(position, df, playerLink):
-    #df = df[(df['IS-A'] >= 100)]
-    
-    if position == "Perimeter":
-        df = df[(df['IS-A'] >= 75)]
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[(df['IS-A'] >= 100)]
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('IS%', axis=1)
-    y = data['IS%']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def midRange(df, playerLink):
-    df = df[df['MR-A'] >= 70]
-    df = df[df['2OFA'] >= 100]
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('MR%', axis=1)
-    y = data['MR%']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def threePointShooting(df, playerLink):
-    df = df[(df['3P-A'] >= 100)]  # attempted ~ 2 3PA a game
-    #df = df[df['2OFA'] >= 100]
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
-                       'IS%', 'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('3P%', axis=1)
-    y = data['3P%']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def freeThrowShooting(df, playerLink):
-    df = df[(df['FTA'] >= 95)]  # attempted ~ 2 3PA a game
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('FT%', axis=1)
-    y = data['FT%']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def rebounding(position, df, playerLink):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('RebP', axis=1)
-    y = data['RebP']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def assists(position, df, playerLink):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Stl', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('Ast', axis=1)
-    y = data['Ast']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def steals(position, df, playerLink):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('Stl', axis=1)
-    y = data['Stl']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def blocks(position, df, playerLink):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('Blk', axis=1)
-    y = data['Blk']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def twoPointOFG(position, df, playerLink):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('2OF%', axis=1)
-    y = data['2OF%']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def threePointOFG(position, df, playerLink):
-    df = df[df['2OFA'] >= 100]
-
-    df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('3OF%', axis=1)
-    y = data['3OF%']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def foulsDrawn(position, df, playerLink):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
-
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ']
-
-    df = df.drop(columns_to_drop, axis=1)
-
-    data = df
-    X = data.drop('FD', axis=1)
-    y = data['FD']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
+def load_model_components(filename):
+    return joblib.load(f'Models-NoD/{filename}.pkl')
 
 def givePlayerStats():
-    position = input("PlayerType, Perimeter or Big: ")
+    position = input("PlayerType, Perimeter(P) or Big(B): ").lower()
+    
+    if "p" in position:
+        position = "Perimeter"
+    elif "b" in position:
+        position = "Big"
+    
     playerLink = input("Player's link: ")
+    player = get_player_info(playerLink)
     print()
+    fin_scaler, fin_pca, fin_model, fin_expected_columns = joblib.load(f'Models-NoD/FIN.pkl')
+
+
+    # Load models and their components
+    fin_scaler, fin_pca, fin_model, fin_expected_columns = load_model_components("FIN")
+    is_scaler, is_pca, is_model, is_expected_columns = load_model_components(f"IS_{position}")
+    mr_scaler, mr_pca, mr_model, mr_expected_columns = load_model_components("MR")
+    tp_scaler, tp_pca, tp_model, tp_expected_columns = load_model_components("3P")
+    ft_scaler, ft_pca, ft_model, ft_expected_columns = load_model_components("FT")
+    rebp_scaler, rebp_pca, rebp_model, rebp_expected_columns = load_model_components(f"RebP_{position}")
+    ast_scaler, ast_pca, ast_model, ast_expected_columns = load_model_components(f"Ast_{position}")
+    stl_scaler, stl_pca, stl_model, stl_expected_columns = load_model_components(f"Stl_{position}")
+    blk_scaler, blk_pca, blk_model, blk_expected_columns = load_model_components(f"Blk_{position}")
+    twoof_scaler, twoof_pca, twoof_model, twoof_expected_columns = load_model_components(f"2OF%_{position}")
+    threeof_scaler, threeof_pca, threeof_model, threeof_expected_columns = load_model_components(f"3OF%_{position}")
+    fd_scaler, fd_pca, fd_model, fd_expected_columns = load_model_components(f"FD_{position}")
 
     predicted_player_stats = {
-        "Finishing%": format(finishing(df, playerLink) * 100, ".1f"),
-        "InsideShot%": format(insideShot(position, df, playerLink) * 100, ".1f"),
-        "MidRange%": format(midRange(df, playerLink) * 100, ".1f"),
-        "ThreePointShooting%": format(threePointShooting(df, playerLink) * 100, ".1f"),
-        "FreeThrowShooting%": format(freeThrowShooting(df, playerLink) * 100, ".1f"),
-        "Rebounds/G": format(rebounding(position, df, playerLink), ".1f"),
-        "Assists/G": format(assists(position, df, playerLink), ".1f"),
-        "Steals/G": format(steals(position, df, playerLink), ".1f"),
-        "Blocks/G": format(blocks(position, df, playerLink), ".1f"),
-        "TwoPointOFG%": format(twoPointOFG(position, df, playerLink) * 100, ".1f"),
-        "ThreePointOFG%": format(threePointOFG(position, df, playerLink) * 100, ".1f"),
-        "FoulsDrawn/G": format(foulsDrawn(position, df, playerLink), ".1f")
+        "Finishing%": format(preprocess_and_predict(player, fin_scaler, fin_pca, fin_model, fin_expected_columns) * 100, ".1f"),
+        "InsideShot%": format(preprocess_and_predict(player, is_scaler, is_pca, is_model, is_expected_columns) * 100, ".1f"),
+        "MidRange%": format(preprocess_and_predict(player, mr_scaler, mr_pca, mr_model, mr_expected_columns) * 100, ".1f"),
+        "ThreePointShooting%": format(preprocess_and_predict(player, tp_scaler, tp_pca, tp_model, tp_expected_columns) * 100, ".1f"),
+        "FreeThrowShooting%": format(preprocess_and_predict(player, ft_scaler, ft_pca, ft_model, ft_expected_columns) * 100, ".1f"),
+        "Rebounds/G": format(preprocess_and_predict(player, rebp_scaler, rebp_pca, rebp_model, rebp_expected_columns), ".1f"),
+        "Assists/G": format(preprocess_and_predict(player, ast_scaler, ast_pca, ast_model, ast_expected_columns), ".1f"),
+        "Steals/G": format(preprocess_and_predict(player, stl_scaler, stl_pca, stl_model, stl_expected_columns), ".1f"),
+        "Blocks/G": format(preprocess_and_predict(player, blk_scaler, blk_pca, blk_model, blk_expected_columns), ".1f"),
+        "TwoPointOFG%": format(preprocess_and_predict(player, twoof_scaler, twoof_pca, twoof_model, twoof_expected_columns) * 100, ".1f"),
+        "ThreePointOFG%": format(preprocess_and_predict(player, threeof_scaler, threeof_pca, threeof_model, threeof_expected_columns) * 100, ".1f"),
+        "FoulsDrawn/G": format(preprocess_and_predict(player, fd_scaler, fd_pca, fd_model, fd_expected_columns), ".1f")
     }
+
     return predicted_player_stats
-
-
-
-#print(givePlayerStats())
 
 
 if __name__ == "__main__":
     while(True):
         name = input("Player Name: ")
-        print()
         print(givePlayerStats())
         print()

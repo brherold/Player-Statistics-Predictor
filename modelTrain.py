@@ -1,10 +1,12 @@
-#Flask version of getpredictedStats
+
+#Input the player's name, position (Perimeter or Big), and URL and get their predicted stats for the season
 
 import pandas as pd
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
+import joblib
 
 from sklearn.model_selection import train_test_split,GridSearchCV
 from sklearn.preprocessing import StandardScaler
@@ -13,97 +15,13 @@ from sklearn.linear_model import Ridge
 from sklearn.decomposition import PCA
 
 from sklearn.feature_selection import RFE
-from pygetPlayerSkills import get_player_info
-
-#df = pd.read_csv("C:/Users/branh/Documents/Hardwood PROJECTSSSSSS/ML Hardwood/totalPlayerDataCleaned.csv", encoding='latin1')
-df = pd.read_csv("C:/Users/branh/Documents/Hardwood PROJECTSSSSSS/ML Hardwood/cleanedPlayerData41-42.csv", encoding='latin1')
-
-def preprocess_and_predict(player, scaler, pca, model, expected_columns):
-    # Convert player data to DataFrame
-    player_df = pd.DataFrame([player])
-    
-    # Check if player_df contains all required columns
-    missing_columns = set(expected_columns) - set(player_df.columns)
-    if missing_columns:
-        raise ValueError(f"Missing columns in player data: {missing_columns}")
-
-    # Ensure the DataFrame columns are in the same order as expected
-    player_df = player_df[expected_columns]
-
-    # Apply the same scaling
-    player_scaled = scaler.transform(player_df)
-
-    # Apply PCA
-    player_pca = pca.transform(player_scaled)
-
-    # Predict using the model
-    prediction = model.predict(player_pca)
-    
-    return prediction
-'''
-def getStat(X_train, X_test, y_train, y_test, playerLink):
-    rfe = RFE(estimator=Ridge(), n_features_to_select=5)
-    rfe.fit(X_train, y_train)
-
-    # Selected features
-    selected_features = X_train.columns[rfe.support_]
-
-    X_train_selected = X_train[selected_features]
-    X_test_selected = X_test[selected_features]
-
-    # Ridge Regression is best model
-    model = Ridge()
-    pipeline = make_pipeline(StandardScaler(), model)
-    param_grid = {'ridge__alpha': [0.1, 1.0, 10.0, 100.0]}
-    grid_search = GridSearchCV(pipeline, param_grid, cv=5, scoring='neg_mean_squared_error')
-    grid_search.fit(X_train_selected, y_train)
-    best_model = grid_search.best_estimator_
-
-    best_model.fit(X_train_selected, y_train)
-    y_pred = best_model.predict(X_test_selected)
-    
-
-    player = get_player_info(playerLink)
-    new_data_df = pd.DataFrame([player])
-
-    # Select only the features that were used for training
-    new_data_selected = new_data_df[selected_features]
-
-    # Predict using the model pipeline
-    new_data_pred = best_model.predict(new_data_selected)
-
-    # Print the predictions
-    return new_data_pred[0]
-'''
-def getStat(X_train, X_test, y_train, y_test, playerLink):
-    # Standardize the training and test data
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-
-    # Apply PCA to retain 95% of variance
-    pca = PCA(n_components=0.95)
-    X_train_pca = pca.fit_transform(X_train_scaled)
-    X_test_pca = pca.transform(X_test_scaled)
-
-    # Train Ridge Regression model
-    model = Ridge()
-    model.fit(X_train_pca, y_train)
-
-    # Make predictions on the test set for evaluation
-    y_pred = model.predict(X_test_pca)
-
-    # Get the player info
-    player = get_player_info(playerLink)
-
-    # Use preprocess_and_predict to get the prediction for the new player
-    prediction = preprocess_and_predict(player, scaler, pca, model, X_train.columns)
-    
-    return prediction[0]
 
 
 
-def finishing(df, playerLink):
+df = pd.read_csv("DataCSVS/cleanedPlayerData41-42-43.csv", encoding='latin1')
+
+
+def finishing(df):
     df = df[(df['F-A'] >= 30)]  # attempted ~ 2 3PA a game
     df = df[df['2OFA'] >= 100]
 
@@ -118,18 +36,31 @@ def finishing(df, playerLink):
     X = data.drop('F%', axis=1)
     y = data['F%']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
+###################################
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
 
-def insideShot(position, df, playerLink):
-    
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/FIN.pkl')
+
+
+def insideShot(position, df):
+    #df = df[(df['IS-A'] >= 100)]
     
     if position == "Perimeter":
-        df = df[(df['IS-A'] >= 50)]
-        df = df[df['2OFA'] >= 100]
+        df = df[(df['IS-A'] >= 75)]
         df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
     else:
         df = df[(df['IS-A'] >= 100)]
-        df = df[df['2OFA'] >= 150]
         df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
@@ -143,10 +74,26 @@ def insideShot(position, df, playerLink):
     X = data.drop('IS%', axis=1)
     y = data['IS%']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
 
-def midRange(df, playerLink):
-    df = df[df['MR-A'] >= 100]
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/IS_{position}.pkl')
+
+    
+
+def midRange(df):
+    df = df[df['MR-A'] >= 70]
     df = df[df['2OFA'] >= 100]
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
@@ -160,17 +107,27 @@ def midRange(df, playerLink):
     X = data.drop('MR%', axis=1)
     y = data['MR%']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
 
-def threePointShooting(position,df, playerLink):
-    if position == "Perimeter":
-        df = df[(df['3P-A'] >= 100)]
-        df = df[df['2OFA'] >= 100]
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[(df['3P-A'] >= 70)]
-        df = df[df['2OFA'] >= 150]
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/MR.pkl')
+
+    
+   
+def threePointShooting(df):
+    df = df[(df['3P-A'] >= 100)]  # attempted ~ 2 3PA a game
+    #df = df[df['2OFA'] >= 100]
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
                        'IS%', 'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', 'DR-M', 'DR-A',
@@ -183,9 +140,23 @@ def threePointShooting(position,df, playerLink):
     X = data.drop('3P%', axis=1)
     y = data['3P%']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
 
-def freeThrowShooting(df, playerLink):
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/3P.pkl')
+
+def freeThrowShooting(df):
     df = df[(df['FTA'] >= 95)]  # attempted ~ 2 3PA a game
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
@@ -199,15 +170,27 @@ def freeThrowShooting(df, playerLink):
     X = data.drop('FT%', axis=1)
     y = data['FT%']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
-
-def rebounding(position, df, playerLink):
     
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/FT.pkl')
+
+def rebounding(position, df):
+    df = df[df['2OFA'] >= 100]
     if position == "Perimeter":
-        df = df[df['2OFA'] >= 100]
         df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
     else:
-        df = df[df['2OFA'] >= 150]
         df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
@@ -221,14 +204,27 @@ def rebounding(position, df, playerLink):
     X = data.drop('RebP', axis=1)
     y = data['RebP']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
 
-def assists(position, df, playerLink):
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/RebP_{position}.pkl')
+
+def assists(position, df):
+    df = df[df['2OFA'] >= 100]
     if position == "Perimeter":
-        df = df[df['2OFA'] >= 100]
         df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
     else:
-        df = df[df['2OFA'] >= 150]
         df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
@@ -242,14 +238,27 @@ def assists(position, df, playerLink):
     X = data.drop('Ast', axis=1)
     y = data['Ast']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
 
-def steals(position, df, playerLink):
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/Ast_{position}.pkl')
+
+def steals(position, df):
+    df = df[df['2OFA'] >= 100]
     if position == "Perimeter":
-        df = df[df['2OFA'] >= 100]
         df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
     else:
-        df = df[df['2OFA'] >= 150]
         df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
@@ -263,14 +272,27 @@ def steals(position, df, playerLink):
     X = data.drop('Stl', axis=1)
     y = data['Stl']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
 
-def blocks(position, df, playerLink):
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/Stl_{position}.pkl')
+
+def blocks(position, df):
+    df = df[df['2OFA'] >= 100]
     if position == "Perimeter":
-        df = df[df['2OFA'] >= 100]
         df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
     else:
-        df = df[df['2OFA'] >= 150]
         df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
@@ -284,14 +306,27 @@ def blocks(position, df, playerLink):
     X = data.drop('Blk', axis=1)
     y = data['Blk']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
 
-def twoPointOFG(position, df, playerLink):
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/Blk_{position}.pkl')
+
+def twoPointOFG(position, df):
+    df = df[df['2OFA'] >= 100]
     if position == "Perimeter":
-        df = df[df['2OFA'] >= 100]
         df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
     else:
-        df = df[df['2OFA'] >= 150]
         df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
@@ -305,12 +340,26 @@ def twoPointOFG(position, df, playerLink):
     X = data.drop('2OF%', axis=1)
     y = data['2OF%']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
 
-def threePointOFG(position, df, playerLink):
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/2OF%_{position}.pkl')
+
+def threePointOFG(position, df):
     df = df[df['2OFA'] >= 100]
-    df = df[df['3OFA'] >= 125]
-    #df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
+
+    df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
                        'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
@@ -323,14 +372,27 @@ def threePointOFG(position, df, playerLink):
     X = data.drop('3OF%', axis=1)
     y = data['3OF%']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
 
-def foulsDrawn(position, df, playerLink):
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/3OF%_{position}.pkl')
+
+def foulsDrawn(position, df):
+    df = df[df['2OFA'] >= 100]
     if position == "Perimeter":
-        df = df[df['2OFA'] >= 100]
         df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
     else:
-        df = df[df['2OFA'] >= 150]
         df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
 
     columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
@@ -344,29 +406,74 @@ def foulsDrawn(position, df, playerLink):
     X = data.drop('FD', axis=1)
     y = data['FD']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return float(getStat(X_train, X_test, y_train, y_test, playerLink))
 
-def givePlayerStats(playerLink):
-    #position = input("PlayerType, Perimeter or Big: ")
-    position = "Perimeter"
-    predicted_player_stats = {
-        "Finishing%": format(finishing(df, playerLink) * 100, ".1f"),
-        "InsideShot%": format(insideShot(position, df, playerLink) * 100, ".1f"),
-        "MidRange%": format(midRange(df, playerLink) * 100, ".1f"),
-        "ThreePointShooting%": format(threePointShooting(position,df, playerLink) * 100, ".1f"),
-        "FreeThrowShooting%": format(freeThrowShooting(df, playerLink) * 100, ".1f"),
-        "Rebounds/G": format(rebounding(position, df, playerLink), ".1f"),
-        "Assists/G": format(assists(position, df, playerLink), ".1f"),
-        "Steals/G": format(steals(position, df, playerLink), ".1f"),
-        "Blocks/G": format(blocks(position, df, playerLink), ".1f"),
-        "TwoPointOFG%": format(twoPointOFG(position, df, playerLink) * 100, ".1f"),
-        "ThreePointOFG%": format(threePointOFG(position, df, playerLink) * 100, ".1f"),
-        "FoulsDrawn/G": format(foulsDrawn(position, df, playerLink), ".1f")
-    }
-    return predicted_player_stats
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
 
 
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/FD_{position}.pkl')
+
+#Model Training
+
+finishing(df)
+midRange(df)
+threePointShooting(df)
+freeThrowShooting(df)
+
+for position in ["Perimeter","Big"]:
+    insideShot(position, df)
+    rebounding(position, df)
+    assists(position, df)
+    steals(position, df)
+    blocks(position, df)
+    twoPointOFG(position, df) 
+    threePointOFG(position, df)
+    foulsDrawn(position, df)
 
 
-#print(givePlayerStats("http://onlinecollegebasketball.org/player/178606"))
+
+
+
+
+#finishing(df)
+
+
+
+
+
+
+'''
+def getStat(X_train, y_train):
+    # Standardize the training and test data
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+'''
+    
+
+
+
+
+
+
+
+#print(givePlayerStats())
+
 
