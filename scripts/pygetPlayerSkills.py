@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
-#Given URL of player, it gets the measureables (Height, Weight, Wingspan, Vertical) and their skills and puts it into a hash
+#Given URL of player, it gets the measureables (Height, Weight, Wingspan, Vertical) and their skills and puts it into a dic
 
 def split_number_and_letter(s):
     s = s.replace('↑', '')
@@ -53,6 +53,7 @@ def transform_player_data(input_data):
     # Define the mapping from input keys to required keys
     key_mapping = {
         'Age': None,  # Not used in the output
+        'Name': "Name",
         'InsideShot': 'IS',
         'BasketballIQ': 'IQ',
         'OutsideShot': 'OS',
@@ -80,6 +81,8 @@ def transform_player_data(input_data):
     for key, new_key in key_mapping.items():
         if new_key is not None and key in input_data:
             output_data[new_key] = input_data[key]
+
+    output_data["Name"] = output_data["Name"].replace("\n", "")
     
     return output_data
 
@@ -88,6 +91,7 @@ def transform_player_data(input_data):
 def get_player_info(playerURL):
     page = requests.get(playerURL)
     soup = BeautifulSoup(page.text, "html.parser")
+    
 
     fullinfoList = soup.find("table").find_all("tr")
     for i in range(len(fullinfoList)):
@@ -138,6 +142,15 @@ def get_player_info(playerURL):
     player_info["Wingspan_inches"] = convert_to_inches(extract_length(split_number_and_letter(infoList[4].text.strip().replace(" ", ""))))
     player_info["Vertical_float"] = Vert_convert_to_inches(extract_length(split_number_and_letter(infoList[5].text.strip().replace(" ", ""))))
 
+
+    #Get Player Name
+    soup2 = BeautifulSoup(page.text, "html.parser")
+
+    name_soup = soup.find("h1")
+    name = name_soup.text
+
+    player_info["Name"] = name
+    
     return transform_player_data(player_info)
 
 

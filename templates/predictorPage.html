@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Stat Predictor</title>
+    <style>
+        /* Full Page Styling */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #main {
+            width: 100%;
+            max-width: 1500px; /* Increased max-width */
+            padding: 30px; /* Increased padding */
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        #title h1 {
+            font-size: 2em; /* Slightly larger title */
+            margin: 10px 0;
+        }
+
+        a {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        a:hover {
+            color: #214d7c;
+        }
+
+        .table-container {
+            max-width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        .stats-table th, .stats-table td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .stats-table th {
+            background-color: #e0e0e0;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .stats-table td {
+            background-color: #f9f9f9;
+            font-size: 0.85em;
+        }
+
+        /* Responsive Fixes */
+        @media (max-width: 900px) {
+            .stats-table th, .stats-table td {
+                font-size: 0.9em;
+                padding: 6px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .stats-table th, .stats-table td {
+                font-size: 0.8em;
+                padding: 5px;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .stats-table th, .stats-table td {
+                font-size: 0.75em;
+                padding: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+{% if position == "P" %}
+    {% set avg_stats = {
+        'Finishing%': 72.0, 
+        'InsideShot%': 53.4, 
+        'MidRange%': 42.6, 
+        '3P%': 35.3, 
+        'FT%': 72.0, 
+        'Reb/G': 2.9, 
+        'Ast/G': 2.9, 
+        'Stl/G': 1.1, 
+        'Blk/G': 0.1,
+        'Ast/TO': 0.93,
+        'O2P%': 51.1, 
+        'O3P%': 34.6, 
+        'FD/G': 2.1
+    } %}
+{% else %}
+    {% set avg_stats = {
+        'Finishing%': 72.0, 
+        'InsideShot%': 55.9, 
+        'MidRange%': 42.6, 
+        '3P%': 35.3, 
+        'FT%': 72.0, 
+        'Reb/G': 6.9, 
+        'Ast/G': 0.69, 
+        'Stl/G': 0.7, 
+        'Blk/G': 0.8, 
+        'Ast/TO': 0.93,
+        'O2P%': 51.7, 
+        'O3P%': 34.6, 
+        'FD/G': 2.2
+    } %}
+{% endif %}
+
+<div id="main">
+
+    <h1><a href="{{ player_url }}" target="_blank">{{ player_name }}</a></h1>
+    <p>
+        {% if position == "P" %}
+          PG/SG/SF
+        {% else %}
+          PF/C
+        {% endif %}
+      </p>
+    <!-- Table Container for Scrolling -->
+    <div class="table-container">
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    {% for stat in stats.keys() %}
+                        <th>{{ stat }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for stat, value in stats.items() %}
+                    <td style="color: 
+                    {% if stat == 'O2P%' or stat == 'O3P%' %}
+                        {% if stats[stat]|float < avg_stats[stat] %}green{% elif stats[stat]|float > avg_stats[stat] %}red{% else %}gray{% endif %}
+                    {% else %}
+                        {% if stats[stat]|float > avg_stats[stat] %}green{% elif stats[stat]|float < avg_stats[stat] %}red{% else %}gray{% endif %}
+                    {% endif %}
+                ;">
+                    {{ stats[stat] }}
+                </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

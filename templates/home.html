@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardwood Stats Predictor</title>
+    <style>
+        /* Full Page Styling */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Main Card Container */
+        #main {
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+            box-sizing: border-box;
+        }
+
+        #title h1 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Player Position Selection */
+        .position-label {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .radio-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            flex-wrap: wrap; 
+        }
+
+        label {
+            font-size: 1em;
+            white-space: nowrap; 
+        }
+
+        /* Input Fields */
+        input[type="url"] {
+            padding: 10px;
+            font-size: 1em;
+            width: 90%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: .8em;
+        }
+
+        /* Submit Button */
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 1.1em;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .radio-group {
+                flex-direction: column; /* Stacks radio buttons vertically */
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="main">
+        <div id="title">
+            <h1>Hardwood Player Stat Predictor</h1>
+        </div>
+        
+        <form method="post">
+            <p class="position-label">Select Player Position</p>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="position" value="P" checked="checked"> PG/SG/SF
+                </label>
+                <label>
+                    <input type="radio" name="position" value="B"> PF/C
+                </label>
+            </div>
+            <input type="url" name="url" placeholder="Enter Player URL">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+</body>
+</html>

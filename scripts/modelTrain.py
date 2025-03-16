@@ -322,6 +322,38 @@ def blocks(position, df):
     # Save model, scaler, and PCA
     joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/Blk_{position}.pkl')
 
+#Assist to Turnover Ratio
+def ast_to(df):
+
+    df = df[df['2OFA'] > 100]  # attempted ~ 2 3PA a game
+    df["AST/TO"] = df["Ast"] / df["TO"]
+    columns_to_drop = ['F-M', 'F-A', 'F%','IS-M', 'IS-A', 'IS%',
+            'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
+        'DR%', 'FTM', 'FTA', 'FT%', 'RebP','Ast', 'Stl', 'TO','2OFM', '2OFA', '2OF%',
+            '3OFM', '3OFA', '3OF%', 'Blk', 'PF', 'DQ', 'FD']
+
+    df = df.drop(columns_to_drop, axis=1)
+
+    data = df
+    X = data.drop('AST/TO', axis=1)
+    y = data['AST/TO']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/AST-TO.pkl')
+
 def twoPointOFG(position, df):
     df = df[df['2OFA'] >= 100]
     if position == "Perimeter":
@@ -355,6 +387,9 @@ def twoPointOFG(position, df):
 
     # Save model, scaler, and PCA
     joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/2OF%_{position}.pkl')
+
+
+
 
 def threePointOFG(position, df):
     df = df[df['2OFA'] >= 100]
@@ -423,6 +458,9 @@ def foulsDrawn(position, df):
     joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/FD_{position}.pkl')
 
 #Model Training
+#ast_to(df)
+'''
+
 
 finishing(df)
 midRange(df)
@@ -438,7 +476,7 @@ for position in ["Perimeter","Big"]:
     twoPointOFG(position, df) 
     threePointOFG(position, df)
     foulsDrawn(position, df)
-
+'''
 
 
 
