@@ -1,5 +1,5 @@
 import pandas as pd
-from pygetPlayerSkills import get_player_info
+from scripts.pygetPlayerSkills import get_player_info
 
 import joblib
 
