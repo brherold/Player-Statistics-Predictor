@@ -1,5 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
 from scripts.flaskGetPredictedStats import *
+import time
+import requests
+import threading
+
 
 app = Flask(__name__)
 
@@ -16,10 +20,23 @@ def home():
 
     #return 
 
+#Self-Pings every 12 minutes to keep web-app open in Render
+def keep_alive():
+    while True:
+        time.sleep(720)  
+        try:
+            requests.get("https://player-statistics-predictor.onrender.com")  
+            print("Self-ping successful")
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to ping: {e}")
+
+# Start the background task when the app starts
+thread = threading.Thread(target=keep_alive, daemon=True)
+thread.start()
 
 
 
 
 if __name__ == '__main__':
-    app.run(port=5002)
+    app.run()
     #app.run(port=5002,debug=True)
