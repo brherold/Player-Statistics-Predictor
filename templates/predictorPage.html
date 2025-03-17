@@ -17,21 +17,22 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            overflow-x: auto; 
         }
 
         #main {
             width: 100%;
-            max-width: 1500px; /* Increased max-width */
-            padding: 30px; /* Increased padding */
+            max-width: 1500px; 
+            padding: 30px; 
             background-color: #ffffff;
             border-radius: 5px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
+            overflow-x: auto; 
         }
         
-
         #title h1 {
-            font-size: 2em; /* Slightly larger title */
+            font-size: 2em; 
             margin: 10px 0;
         }
 
@@ -97,9 +98,6 @@
             transform: scale(0.98);
         }
 
-
-
-
         /* Responsive Fixes */
         @media (max-width: 900px) {
             .stats-table th, .stats-table td {
@@ -124,7 +122,7 @@
     </style>
 </head>
 <body>
-
+<!-- Model Averages by Position for every Stat  -->
 {% if position == "P" %}
     {% set avg_stats = {
         'Finishing%': 72.0, 
@@ -141,6 +139,7 @@
         'O3P%': 34.6, 
         'FD/G': 2.1
     } %}
+
 {% else %}
     {% set avg_stats = {
         'Finishing%': 72.0, 
@@ -157,6 +156,7 @@
         'O3P%': 34.6, 
         'FD/G': 2.2
     } %}
+
 {% endif %}
 
 <div id="main">
@@ -183,14 +183,13 @@
                 <tr>
                     {% for stat, value in stats.items() %}
                     <td style="color: 
-                    {% if stat == 'O2P%' or stat == 'O3P%' %}
-                        {% if stats[stat]|float < avg_stats[stat] %}green{% elif stats[stat]|float > avg_stats[stat] %}red{% else %}gray{% endif %}
-                    {% else %}
+                    {% if stat == 'O2P%' or stat == 'O3P%' %} 
+                        {% if stats[stat]|float < avg_stats[stat] %}green{% elif stats[stat]|float > avg_stats[stat] %}red{% else %}gray{% endif %} 
+                    {% else %} 
                         {% if stats[stat]|float > avg_stats[stat] %}green{% elif stats[stat]|float < avg_stats[stat] %}red{% else %}gray{% endif %}
-                    {% endif %}
-                ;">
-                    {{ stats[stat] }}
-                </td>
+                    {% endif %}">
+                        {{ stats[stat] }}
+                    </td>
                     {% endfor %}
                 </tr>
             </tbody>

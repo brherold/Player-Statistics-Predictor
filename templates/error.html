@@ -17,11 +17,12 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            overflow-x: auto; 
         }
 
         /* Error Container */
         .error-container {
-            width: 90%;
+            width: 100%;
             max-width: 500px;
             padding: 20px;
             background-color: #ffffff;
@@ -65,13 +66,42 @@
             background-color: #004494;
             transform: scale(0.98);
         }
+
+        /* Responsive Fixes */
+        @media (max-width: 700px) {
+            .error-container {
+                padding: 15px;
+            }
+
+            .error-container h1 {
+                font-size: 1.25em;
+            }
+
+            .error-container p {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .error-container {
+                padding: 10px;
+            }
+
+            .error-container h1 {
+                font-size: 1.1em;
+            }
+
+            .error-container p {
+                font-size: 0.85em;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div class="error-container">
+    <div class="error-container">                                           
         <h1>Error: Invalid URL</h1>
-        <p>Please enter a valid player URL from Hardwood ("<strong><a href= "onlinecollegebasketball.org" target="_blank"> onlinecollegebasketball.org</strong>")</a>.</p>
+        <p>Please enter a valid player URL from Hardwood ("<strong><a href="http://onlinecollegebasketball.org/" target="_blank">onlinecollegebasketball.org</a></strong>").</p>
         <a href="{{ url_for('home') }}" class="home-button">Return Home</a>
     </div>
 
