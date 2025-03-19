@@ -55,7 +55,7 @@ def finishing(df):
 
 def insideShot(position, df):
     #df = df[(df['IS-A'] >= 100)]
-    
+    df = df[(df['2OFA'] + df['3OFA']) >= 200]
     if position == "Perimeter":
         df = df[(df['IS-A'] >= 75)]
         df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
@@ -63,10 +63,10 @@ def insideShot(position, df):
         df = df[(df['IS-A'] >= 100)]
         df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+    columns_to_drop = ['OS','Hnd','Fin','Rng','Drv','Pass','IDef','PDef','F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
+        'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
+       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
+       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
 
     df = df.drop(columns_to_drop, axis=1)
 
@@ -93,10 +93,10 @@ def insideShot(position, df):
     
 
 def midRange(df):
-    df = df[df['MR-A'] >= 70]
+    df = df[df['MR-A'] >= 100]
     df = df[df['2OFA'] >= 100]
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
+    columns_to_drop = ['Pass','Hnd','Drv','F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
                        'MR-M', 'MR-A', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
                        'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
                        '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
@@ -127,12 +127,12 @@ def midRange(df):
    
 def threePointShooting(df):
     df = df[(df['3P-A'] >= 100)]  # attempted ~ 2 3PA a game
-    #df = df[df['2OFA'] >= 100]
+    df = df[(df['2OFA'] + df['3OFA']) >= 200]
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
-                       'IS%', 'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+    columns_to_drop = ['IS','Reb','Fin','IDef','Pass','PDef','Str','F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
+       'IS%', 'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', 'DR-M', 'DR-A',
+       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
+       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
 
     df = df.drop(columns_to_drop, axis=1)
 
@@ -477,8 +477,6 @@ for position in ["Perimeter","Big"]:
     threePointOFG(position, df)
     foulsDrawn(position, df)
 '''
-
-
 
 
 
