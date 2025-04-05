@@ -6,6 +6,7 @@ import re
 
 def split_number_and_letter(s):
     s = s.replace('↑', '')
+    s = s.replace('↓','')
     # Split the string into parts that contain numbers, fractions, letters, single quotes, and double quotes
     return re.findall(r'\d+|[¼½]|[^\d¼½\'"]+|[\'"]', s)
 
@@ -155,5 +156,5 @@ def get_player_info(playerURL):
 
 
 
-#print(get_player_info("http://onlinecollegebasketball.org/prospect/202447"))
+#print(get_player_info("http://onlinecollegebasketball.org/prospect/209437"))
 
