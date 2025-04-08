@@ -84,6 +84,12 @@ def transform_player_data(input_data):
             output_data[new_key] = input_data[key]
 
     output_data["Name"] = output_data["Name"].replace("\n", "")
+
+    #For matching with BPM dic
+    output_data["height"] = output_data["Height_inches"]
+    output_data["wingspan"] = output_data["Wingspan_inches"] 
+    output_data["weight"] = output_data['Weight']
+    output_data["vertical"] = output_data["Vertical_float"]
     
     return output_data
 
@@ -142,6 +148,7 @@ def get_player_info(playerURL):
     player_info["Height_inches"] = convert_to_inches(extract_length(split_number_and_letter(infoList[2].text.strip().replace(" ", ""))))
     player_info["Wingspan_inches"] = convert_to_inches(extract_length(split_number_and_letter(infoList[4].text.strip().replace(" ", ""))))
     player_info["Vertical_float"] = Vert_convert_to_inches(extract_length(split_number_and_letter(infoList[5].text.strip().replace(" ", ""))))
+
 
 
     #Get Player Name

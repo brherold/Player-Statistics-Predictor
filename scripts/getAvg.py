@@ -6,7 +6,7 @@ import joblib
 
 
 
-def preprocess_and_predict(player, scaler, pca, model, expected_columns, avg_pred=None, allow_negative=False, is_bpm =False):
+def preprocess_and_predict(player, scaler, pca, model, expected_columns, avg_pred=None, allow_negative=False):
     # Ensure input is in DataFrame format
     player_df = pd.DataFrame([player])
 
@@ -34,16 +34,6 @@ def preprocess_and_predict(player, scaler, pca, model, expected_columns, avg_pre
             comparison = "Above Avg"
         else:
             comparison = "Below Avg"
-    
-    if is_bpm:
-        prediction = float(format(prediction, ".1f"))
-        if prediction == 0.0:
-            comparison = "Avg"
-        elif prediction > 0.0:
-            comparison = "Above Avg"
-        else:
-            comparison = "Below Avg"
-
 
     return {
         "prediction": prediction,
@@ -60,7 +50,7 @@ def load_model_components(filename):
 def format_stat(pred, percent=False):
     value = pred["prediction"] * 100 if percent else pred["prediction"]
     return {
-        "value": float(format(value, ".1f")),
+        "value": format(value, ".1f"),
         "comparison": pred["comparison"]
     }
 
@@ -175,27 +165,23 @@ def givePlayerStats(playerLink,position):
     )
 
     predicted_player_stats["OBPM"] = format_stat(
-        preprocess_and_predict(player, obpm_scaler, obpm_pca, obpm_model, obpm_expected_columns, obpm_avg_pred, allow_negative=True, is_bpm=True)
+        preprocess_and_predict(player, obpm_scaler, obpm_pca, obpm_model, obpm_expected_columns, obpm_avg_pred, allow_negative=True)
     )
 
     predicted_player_stats["DBPM"] = format_stat(
-        preprocess_and_predict(player, dbpm_scaler, dbpm_pca, dbpm_model, dbpm_expected_columns, dbpm_avg_pred, allow_negative=True, is_bpm=True)
+        preprocess_and_predict(player, dbpm_scaler, dbpm_pca, dbpm_model, dbpm_expected_columns, dbpm_avg_pred, allow_negative=True)
     )
 
-    
     predicted_player_stats["BPM"] = format_stat(
-        {
-            "prediction": predicted_player_stats["OBPM"]["value"] + predicted_player_stats["DBPM"]["value"],
-            "comparison": "Above Avg" if (predicted_player_stats["OBPM"]["value"] + predicted_player_stats["DBPM"]["value"]) > 0.0 else "Below Avg"
-        }
+        preprocess_and_predict(player, bpm_scaler, bpm_pca, bpm_model, bpm_expected_columns, bpm_avg_pred, allow_negative=True)
     )
 
-    
+
     return player_name, predicted_player_stats
 
-#print(givePlayerStats("http://onlinecollegebasketball.org/prospect/205172","C"))
 
-            
+
+#print(givePlayerStats("http://onlinecollegebasketball.org/prospect/205173","C"))
 
 #run python -m scripts.flaskGetPredictedStats
 

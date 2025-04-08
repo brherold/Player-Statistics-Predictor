@@ -18,23 +18,27 @@ from sklearn.feature_selection import RFE
 
 
 
-df = pd.read_csv("DataCSVS/cleanedPlayerData41-42-43.csv", encoding='latin1')
+#df = pd.read_csv("DataCSVS/cleanedPlayerData41-42-43.csv", encoding='latin1')
+df_total = pd.read_csv("DataCSVS/2044-Cleaned.csv", encoding='latin1')
+df_PG = pd.read_csv("DataCSVS/PG-Cleaned.csv", encoding='latin1')
+df_SG = pd.read_csv("DataCSVS/SG-Cleaned.csv", encoding='latin1')
+df_SF = pd.read_csv("DataCSVS/SF-Cleaned.csv", encoding='latin1')
+df_Perimeter = pd.read_csv("DataCSVS/Perimeter-Cleaned.csv", encoding='latin1')
+df_Bigs = pd.read_csv("DataCSVS/Bigs-Cleaned.csv", encoding='latin1')
 
 
 def finishing(df):
-    df = df[(df['F-A'] >= 30)]  # attempted ~ 2 3PA a game
-    df = df[df['2OFA'] >= 100]
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'Fin',
+        'Reb', 'IDef', 'PDef', 'IQ',  'Str', 'Spd', 'Sta', 'Hnd', 'Drv',
+            'F_P']
 
-    columns_to_drop = ['F-M', 'F-A', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+    df = df[df['F_A'] >= .5]
 
-    df = df.drop(columns_to_drop, axis=1)
+    df = df[features]
 
     data = df
-    X = data.drop('F%', axis=1)
-    y = data['F%']
+    X = data.drop('F_P', axis=1)
+    y = data['F_P']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 ###################################
     scaler = StandardScaler()
@@ -49,30 +53,38 @@ def finishing(df):
     model = Ridge()
     model.fit(X_train_pca, y_train)
 
+    # Now, let's predict on the test set
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/FIN.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/FIN.pkl')
 
 
 def insideShot(position, df):
-    #df = df[(df['IS-A'] >= 100)]
-    df = df[(df['2OFA'] + df['3OFA']) >= 200]
-    if position == "Perimeter":
-        df = df[(df['IS-A'] >= 75)]
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
+
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Fin',
+        'Reb', 'IQ', 'Str', 'Spd', 'Sta',
+            'IS_P']
+
+    if position == "Bigs":
+
+        df = df[df['IS_A'] >= 3] #For Bigs
     else:
-        df = df[(df['IS-A'] >= 100)]
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
+        df = df[df['IS_A'] >= 1] #For Perimeter
 
-    columns_to_drop = ['OS','Hnd','Fin','Rng','Drv','Pass','IDef','PDef','F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
-        'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+    df = df[features]
 
-    df = df.drop(columns_to_drop, axis=1)
 
     data = df
-    X = data.drop('IS%', axis=1)
-    y = data['IS%']
+    X = data.drop('IS_P', axis=1)
+    y = data['IS_P']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     scaler = StandardScaler()
@@ -87,25 +99,34 @@ def insideShot(position, df):
     model = Ridge()
     model.fit(X_train_pca, y_train)
 
+    # Now, let's predict on the test set
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/IS_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/IS_{position}.pkl')
 
     
 
 def midRange(df):
-    df = df[df['MR-A'] >= 100]
-    df = df[df['2OFA'] >= 100]
+    features = ['height', 'weight', 'wingspan', 'vertical', 'OS', 'Rng',
+        'Spd', 'Sta',
+            'MR_P']
 
-    columns_to_drop = ['Pass','Hnd','Drv','F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+    df = df[df['MR_A'] >= 2]
 
-    df = df.drop(columns_to_drop, axis=1)
+    df = df[features]
 
     data = df
-    X = data.drop('MR%', axis=1)
-    y = data['MR%']
+    X = data.drop('MR_P', axis=1)
+    y = data['MR_P']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     scaler = StandardScaler()
@@ -120,25 +141,34 @@ def midRange(df):
     model = Ridge()
     model.fit(X_train_pca, y_train)
 
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    
+
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/MR.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/MR.pkl')
 
     
    
 def threePointShooting(df):
-    df = df[(df['3P-A'] >= 100)]  # attempted ~ 2 3PA a game
-    df = df[(df['2OFA'] + df['3OFA']) >= 200]
+    features = ['height', 'weight', 'wingspan', 'vertical','OS', 'Rng', 
+            'IQ', 'Spd', 'Sta',
+            '_3P_P']
 
-    columns_to_drop = ['IS','Reb','Fin','IDef','Pass','PDef','Str','F-M', 'F-A', 'F%', 'IS-M', 'IS-A',
-       'IS%', 'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', 'DR-M', 'DR-A',
-       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+    df = df[df['_3P_A'] >= 4]
 
-    df = df.drop(columns_to_drop, axis=1)
+    df = df[features]
 
     data = df
-    X = data.drop('3P%', axis=1)
-    y = data['3P%']
+    X = data.drop('_3P_P', axis=1)
+    y = data['_3P_P']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     scaler = StandardScaler()
@@ -153,22 +183,29 @@ def threePointShooting(df):
     model = Ridge()
     model.fit(X_train_pca, y_train)
 
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/3P.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/3P.pkl')
 
 def freeThrowShooting(df):
-    df = df[(df['FTA'] >= 95)]  # attempted ~ 2 3PA a game
+    features = ['height', 'weight', 'wingspan', 'vertical', 'OS', 'FT_P']
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '2OF%', '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+    df = df[df['FT_A'] >= 2]
 
-    df = df.drop(columns_to_drop, axis=1)
+    df = df[features]
 
     data = df
-    X = data.drop('FT%', axis=1)
-    y = data['FT%']
+    X = data.drop('FT_P', axis=1)
+    y = data['FT_P']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     scaler = StandardScaler()
@@ -183,26 +220,29 @@ def freeThrowShooting(df):
     model = Ridge()
     model.fit(X_train_pca, y_train)
 
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/FT.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/FT.pkl')
 
 def rebounding(position, df):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS',
+        'Reb', 'IQ',  'Str', 'Spd', 'Sta',
+            'Rebs']
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+    df = df[features]
 
-    df = df.drop(columns_to_drop, axis=1)
 
     data = df
-    X = data.drop('RebP', axis=1)
-    y = data['RebP']
+    X = data.drop('Rebs', axis=1)
+    y = data['Rebs']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     scaler = StandardScaler()
@@ -216,27 +256,31 @@ def rebounding(position, df):
     # Train Ridge Regression model
     model = Ridge()
     model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/RebP_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/RebP_{position}.pkl')
 
 def assists(position, df):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Str', 'Spd', 'Sta',
+            'AST']
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Stl', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
 
-    df = df.drop(columns_to_drop, axis=1)
+
+    df = df[features]
 
     data = df
-    X = data.drop('Ast', axis=1)
-    y = data['Ast']
+    X = data.drop('AST', axis=1)
+    y = data['AST']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     scaler = StandardScaler()
@@ -250,27 +294,31 @@ def assists(position, df):
     # Train Ridge Regression model
     model = Ridge()
     model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/Ast_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/Ast_{position}.pkl')
 
 def steals(position, df):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
+    features = ['height', 'wingspan', 'vertical', 
+            'IDef', 'PDef', 'IQ', 'Str', 'Spd', 'Sta',
+            'STL']
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
+    df = df[features]
 
-    df = df.drop(columns_to_drop, axis=1)
 
     data = df
-    X = data.drop('Stl', axis=1)
-    y = data['Stl']
+    X = data.drop('STL', axis=1)
+    y = data['STL']
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     scaler = StandardScaler()
@@ -284,27 +332,30 @@ def steals(position, df):
     # Train Ridge Regression model
     model = Ridge()
     model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
 
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+    
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/Stl_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/Stl_{position}.pkl')
 
 def blocks(position, df):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
+    features = ['height', 'weight', 'wingspan', 'vertical',
+        'Reb', 'IDef', 'PDef',  'Str', 'Spd', 'Sta',
+            'BLK']
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
-
-    df = df.drop(columns_to_drop, axis=1)
+    df = df[features]
 
     data = df
-    X = data.drop('Blk', axis=1)
-    y = data['Blk']
+    X = data.drop('BLK', axis=1)
+    y = data['BLK']
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     scaler = StandardScaler()
@@ -318,25 +369,35 @@ def blocks(position, df):
     # Train Ridge Regression model
     model = Ridge()
     model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/Blk_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/Blk_{position}.pkl')
 
 #Assist to Turnover Ratio
-def ast_to(df):
+def ast_to(position, df):
+    
+    df["AST/TO"] = df["AST"] / df["TO"]
 
-    df = df[df['2OFA'] > 100]  # attempted ~ 2 3PA a game
-    df["AST/TO"] = df["Ast"] / df["TO"]
-    columns_to_drop = ['F-M', 'F-A', 'F%','IS-M', 'IS-A', 'IS%',
-            'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-        'DR%', 'FTM', 'FTA', 'FT%', 'RebP','Ast', 'Stl', 'TO','2OFM', '2OFA', '2OF%',
-            '3OFM', '3OFA', '3OF%', 'Blk', 'PF', 'DQ', 'FD']
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Str', 'Spd', 'Sta',
+            'AST/TO']
 
-    df = df.drop(columns_to_drop, axis=1)
+
+    df = df[features]
 
     data = df
     X = data.drop('AST/TO', axis=1)
     y = data['AST/TO']
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     scaler = StandardScaler()
@@ -351,26 +412,29 @@ def ast_to(df):
     model = Ridge()
     model.fit(X_train_pca, y_train)
 
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/AST-TO.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/AST-TO_{position}.pkl')
 
 def twoPointOFG(position, df):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
+    features = ['height', 'weight', 'wingspan', 'vertical',
+        'IDef', 'PDef', 'IQ',  'Str', 'Spd', 'Sta',
+            'O_2P_P']
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ', 'FD']
 
-    df = df.drop(columns_to_drop, axis=1)
+    df = df[features]
 
     data = df
-    X = data.drop('2OF%', axis=1)
-    y = data['2OF%']
+    X = data.drop('O_2P_P', axis=1)
+    y = data['O_2P_P']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     scaler = StandardScaler()
@@ -385,27 +449,34 @@ def twoPointOFG(position, df):
     model = Ridge()
     model.fit(X_train_pca, y_train)
 
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/2OF%_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/2OF%_{position}.pkl')
 
 
 
 
-def threePointOFG(position, df):
-    df = df[df['2OFA'] >= 100]
+def threePointOFG(df):
 
-    df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
+    features = ['height', 'wingspan', 'vertical',
+            'PDef', 'IQ','Spd', 'Sta',
+            'O_3P_P']
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', 'TO', 'PF', 'DQ', 'FD']
+    df = df[df['O_3P_A'] >= 4] #Use Perimeter (for both)
 
-    df = df.drop(columns_to_drop, axis=1)
+    df = df[features]
 
     data = df
-    X = data.drop('3OF%', axis=1)
-    y = data['3OF%']
+    X = data.drop('O_3P_P', axis=1)
+    y = data['O_3P_P']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     scaler = StandardScaler()
@@ -420,26 +491,30 @@ def threePointOFG(position, df):
     model = Ridge()
     model.fit(X_train_pca, y_train)
 
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/3OF%_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/3OF%.pkl')
 
 def foulsDrawn(position, df):
-    df = df[df['2OFA'] >= 100]
-    if position == "Perimeter":
-        df = df[df['3OFA'] >= 0.4 * (df['2OFA'] + df['3OFA'])]  # For Guards
-    else:
-        df = df[df['2OFA'] >= 0.7 * (df['2OFA'] + df['3OFA'])]  # For Bigs
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Str', 'Sta',
+            'FD']
 
-    columns_to_drop = ['F-M', 'F-A', 'F%', 'IS-M', 'IS-A', 'IS%',
-                       'MR-M', 'MR-A', 'MR%', '3P-M', '3P-A', '3P%', 'DR-M', 'DR-A',
-                       'DR%', 'FTM', 'FTA', 'FT%', 'RebP', 'Ast', 'Stl', 'Blk', '2OFM', '2OFA', '2OF%',
-                       '3OFM', '3OFA', '3OF%', 'TO', 'PF', 'DQ']
-
-    df = df.drop(columns_to_drop, axis=1)
+    df = df[features]
 
     data = df
     X = data.drop('FD', axis=1)
     y = data['FD']
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     scaler = StandardScaler()
@@ -453,43 +528,32 @@ def foulsDrawn(position, df):
     # Train Ridge Regression model
     model = Ridge()
     model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns), f'Models-NoD/FD_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/FD_{position}.pkl')
 
-#Model Training
-#ast_to(df)
-'''
+def OBPM(position,df):
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Str', 'Sta',
+            'OBPM']
 
+    df = df[features]
 
-finishing(df)
-midRange(df)
-threePointShooting(df)
-freeThrowShooting(df)
+    data = df
+    X = data.drop('OBPM', axis=1)
+    y = data['OBPM']
 
-for position in ["Perimeter","Big"]:
-    insideShot(position, df)
-    rebounding(position, df)
-    assists(position, df)
-    steals(position, df)
-    blocks(position, df)
-    twoPointOFG(position, df) 
-    threePointOFG(position, df)
-    foulsDrawn(position, df)
-'''
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-
-
-#finishing(df)
-
-
-
-
-
-
-'''
-def getStat(X_train, y_train):
-    # Standardize the training and test data
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
 
@@ -501,8 +565,138 @@ def getStat(X_train, y_train):
     # Train Ridge Regression model
     model = Ridge()
     model.fit(X_train_pca, y_train)
-'''
     
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/OBPM_{position}.pkl')
+
+
+
+def DBPM(position,df):
+
+    features = ['height', 'weight', 'wingspan', 'vertical',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Spd', 'Str', 'Sta',
+            'DBPM']
+
+    df = df[features]
+
+    data = df
+    X = data.drop('DBPM', axis=1)
+    y = data['DBPM']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/DBPM_{position}.pkl')
+
+
+def BPM(position,df):
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Str', 'Sta',
+            'BPM']
+
+    df = df[features]
+
+    data = df
+    X = data.drop('BPM', axis=1)
+    y = data['BPM']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/BPM_{position}.pkl')
+
+
+#Model Training
+
+#'''
+
+
+finishing(df_total)
+midRange(df_total)
+threePointShooting(df_Perimeter)
+freeThrowShooting(df_total)
+threePointOFG(df_Perimeter)
+
+for position in ["Perimeter","Bigs"]:
+    df = pd.read_csv(f"DataCSVS/{position}-Cleaned.csv")
+    insideShot(position,df)
+    blocks(position,df)
+    twoPointOFG(position,df)
+
+
+
+
+for position in ["G","SF","Bigs"]:
+    df = pd.read_csv(f"DataCSVS/{position}-Cleaned.csv")
+    OBPM(position,df)
+    DBPM(position,df)
+    BPM(position,df)
+
+
+
+for position in ["PG","SG","SF","Bigs"]:
+    df = pd.read_csv(f"DataCSVS/{position}-Cleaned.csv")
+    rebounding(position,df)
+    assists(position,df)
+    steals(position,df)
+    ast_to(position,df)
+    foulsDrawn(position,df)
+
+#'''
+
+
+
 
 
 

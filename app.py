@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from scripts.flaskGetPredictedStats import *
+
 import time
 import requests
 import threading

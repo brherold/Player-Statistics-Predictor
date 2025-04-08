@@ -122,49 +122,16 @@
     </style>
 </head>
 <body>
-<!-- Model Averages by Position for every Stat  -->
-{% if position == "P" %}
-    {% set avg_stats = {
-        'Finishing%': 72.0, 
-        'InsideShot%': 53.4, 
-        'MidRange%': 42.6, 
-        '3P%': 35.3, 
-        'FT%': 72.0, 
-        'Reb/G': 2.9, 
-        'Ast/G': 2.9, 
-        'Stl/G': 1.1, 
-        'Blk/G': 0.1,
-        'Ast/TO': 0.93,
-        'O2P%': 51.1, 
-        'O3P%': 34.6, 
-        'FD/G': 2.1
-    } %}
-
-{% else %}
-    {% set avg_stats = {
-        'Finishing%': 72.0, 
-        'InsideShot%': 55.9, 
-        'MidRange%': 42.6, 
-        '3P%': 35.3, 
-        'FT%': 72.0, 
-        'Reb/G': 6.9, 
-        'Ast/G': 0.69, 
-        'Stl/G': 0.7, 
-        'Blk/G': 0.8, 
-        'Ast/TO': 0.93,
-        'O2P%': 51.7, 
-        'O3P%': 34.6, 
-        'FD/G': 2.2
-    } %}
-
-{% endif %}
-
 <div id="main">
 
     <h1><a href="{{ player_url }}" target="_blank">{{ player_name }}</a></h1>
     <p>Position: 
-        {% if position == "P" %}
-          PG/SG/SF
+        {% if position == "PG" %}
+          PG
+        {% elif position == "SG" %}
+          SG
+        {% elif position == "SF" %}
+            SF
         {% else %}
           PF/C
         {% endif %}
@@ -182,14 +149,22 @@
             <tbody>
                 <tr>
                     {% for stat, value in stats.items() %}
-                    <td style="color: 
-                    {% if stat == 'O2P%' or stat == 'O3P%' %} 
-                        {% if stats[stat]|float < avg_stats[stat] %}green{% elif stats[stat]|float > avg_stats[stat] %}red{% else %}gray{% endif %} 
-                    {% else %} 
-                        {% if stats[stat]|float > avg_stats[stat] %}green{% elif stats[stat]|float < avg_stats[stat] %}red{% else %}gray{% endif %}
-                    {% endif %}">
-                        {{ stats[stat] }}
-                    </td>
+                    <td style="color:
+                    {% if stat == 'O2P%' or stat == 'O3P%' %}
+                        {% if value.comparison == 'Below Avg' %}green
+                        {% elif value.comparison == 'Above Avg' %}red
+                        {% else %}gray
+                        {% endif %}
+                    {% else %}
+                        {% if value.comparison == 'Above Avg' %}green
+                        {% elif value.comparison == 'Below Avg' %}red
+                        {% else %}gray
+                        {% endif %}
+                    {% endif %};
+                    font-weight: bold;
+                ">
+                    {{ value.value }}
+                </td>
                     {% endfor %}
                 </tr>
             </tbody>
