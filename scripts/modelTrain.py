@@ -677,11 +677,6 @@ for position in ["Perimeter","Bigs"]:
 
 
 
-for position in ["G","SF","Bigs"]:
-    df = pd.read_csv(f"DataCSVS/{position}-Cleaned.csv")
-    OBPM(position,df)
-    DBPM(position,df)
-    BPM(position,df)
 
 
 
@@ -692,6 +687,9 @@ for position in ["PG","SG","SF","Bigs"]:
     steals(position,df)
     ast_to(position,df)
     foulsDrawn(position,df)
+    OBPM(position,df)
+    DBPM(position,df)
+    BPM(position,df)
 
 #'''
 

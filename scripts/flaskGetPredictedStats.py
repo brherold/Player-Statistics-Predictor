@@ -71,15 +71,15 @@ def givePlayerStats(playerLink,position):
     if position in ["PF", "C"]:
         position = "Bigs"
         position_group = "Bigs"
-        positionBPM = "Bigs"
+        
 
     elif position in ["PG", "SG"]:
         position_group = "Perimeter"
-        positionBPM = "G"
+        
 
     elif position == "SF":
         position_group = "Perimeter"
-        positionBPM = "SF"
+        
     
     player = get_player_info(playerLink)
     player_name = player["Name"]
@@ -106,9 +106,9 @@ def givePlayerStats(playerLink,position):
     fd_scaler, fd_pca, fd_model, fd_expected_columns, fd_avg_pred = load_model_components(f"FD_{position}")
     ast_to_scaler, ast_to_pca, ast_to_model, ast_to_expected_columns, ast_to_avg_pred = load_model_components(f"AST-TO_{position}")
 
-    obpm_scaler, obpm_pca, obpm_model, obpm_expected_columns, obpm_avg_pred = load_model_components(f"OBPM_{positionBPM}")
-    dbpm_scaler, dbpm_pca, dbpm_model, dbpm_expected_columns, dbpm_avg_pred = load_model_components(f"DBPM_{positionBPM}")
-    bpm_scaler, bpm_pca, bpm_model, bpm_expected_columns, bpm_avg_pred = load_model_components(f"BPM_{positionBPM}")
+    obpm_scaler, obpm_pca, obpm_model, obpm_expected_columns, obpm_avg_pred = load_model_components(f"OBPM_{position}")
+    dbpm_scaler, dbpm_pca, dbpm_model, dbpm_expected_columns, dbpm_avg_pred = load_model_components(f"DBPM_{position}")
+    #bpm_scaler, bpm_pca, bpm_model, bpm_expected_columns, bpm_avg_pred = load_model_components(f"BPM_{positionBPM}")
 
 
     # Dictionary to store all predicted stats
@@ -193,7 +193,7 @@ def givePlayerStats(playerLink,position):
     
     return player_name, predicted_player_stats
 
-#print(givePlayerStats("http://onlinecollegebasketball.org/prospect/205172","C"))
+#print(givePlayerStats("http://onlinecollegebasketball.org/prospect/202447","PG"))
 
             
 
