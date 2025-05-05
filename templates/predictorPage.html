@@ -127,44 +127,59 @@
     <h1><a href="{{ player_url }}" target="_blank">{{ player_name }}</a></h1>
     <p>Position: 
         {% if position == "PG" %}
-          PG
+            PG
         {% elif position == "SG" %}
-          SG
+            SG
         {% elif position == "SF" %}
             SF
         {% else %}
-          PF/C
+            PF/C
         {% endif %}
-      </p>
+    </p>
+
     <!-- Table Container for Scrolling -->
     <div class="table-container">
         <table class="stats-table">
             <thead>
                 <tr>
                     {% for stat in stats.keys() %}
-                        <th>{{ stat }}</th>
+                        {% if stat == "OPM" %}
+                            <th title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">
+                                {{ stat }} <span title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">ℹ️</span>
+                            </th>
+                        {% elif stat == "DPM" %}
+                            <th title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">
+                                {{ stat }} <span title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">ℹ️</span>
+                            </th>
+                        {% elif stat == "EPM" %}
+                            <th title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">
+                                {{ stat }} <span title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">ℹ️</span>
+                            </th>
+                        {% else %}
+                            <th>{{ stat }}</th>
+                        {% endif %}
                     {% endfor %}
                 </tr>
             </thead>
+            
             <tbody>
                 <tr>
                     {% for stat, value in stats.items() %}
-                    <td style="color:
-                    {% if stat == 'O2P%' or stat == 'O3P%' %}
-                        {% if value.comparison == 'Below Avg' %}green
-                        {% elif value.comparison == 'Above Avg' %}red
-                        {% else %}gray
-                        {% endif %}
-                    {% else %}
-                        {% if value.comparison == 'Above Avg' %}green
-                        {% elif value.comparison == 'Below Avg' %}red
-                        {% else %}gray
-                        {% endif %}
-                    {% endif %};
-                    font-size: 1em;
-                ">
-                    {{ value.value }}
-                </td>
+                        <td style="color:
+                        {% if stat == 'O2P%' or stat == 'O3P%' %}
+                            {% if value.comparison == 'Below Avg' %}green
+                            {% elif value.comparison == 'Above Avg' %}red
+                            {% else %}gray
+                            {% endif %}
+                        {% else %}
+                            {% if value.comparison == 'Above Avg' %}green
+                            {% elif value.comparison == 'Below Avg' %}red
+                            {% else %}gray
+                            {% endif %}
+                        {% endif %};
+                        font-weight: bold;">
+                            {{ value.value }}
+                        </td>
                     {% endfor %}
                 </tr>
             </tbody>
@@ -173,6 +188,5 @@
     </div>
 
 </div>
-
 </body>
 </html>

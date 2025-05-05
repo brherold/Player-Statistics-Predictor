@@ -174,19 +174,19 @@ def givePlayerStats(playerLink,position):
         percent=True
     )
 
-    predicted_player_stats["OBPM"] = format_stat(
+    predicted_player_stats["OPM"] = format_stat(
         preprocess_and_predict(player, obpm_scaler, obpm_pca, obpm_model, obpm_expected_columns, obpm_avg_pred, allow_negative=True, is_bpm=True)
     )
 
-    predicted_player_stats["DBPM"] = format_stat(
+    predicted_player_stats["DPM"] = format_stat(
         preprocess_and_predict(player, dbpm_scaler, dbpm_pca, dbpm_model, dbpm_expected_columns, dbpm_avg_pred, allow_negative=True, is_bpm=True)
     )
 
     
-    predicted_player_stats["BPM"] = format_stat(
+    predicted_player_stats["EPM"] = format_stat(
         {
-            "prediction": predicted_player_stats["OBPM"]["value"] + predicted_player_stats["DBPM"]["value"],
-            "comparison": "Above Avg" if (predicted_player_stats["OBPM"]["value"] + predicted_player_stats["DBPM"]["value"]) > 0.0 else "Below Avg"
+            "prediction": predicted_player_stats["OPM"]["value"] + predicted_player_stats["OPM"]["value"],
+            "comparison": "Above Avg" if (predicted_player_stats["OPM"]["value"] + predicted_player_stats["DPM"]["value"]) > 0.0 else "Below Avg"
         }
     )
 
