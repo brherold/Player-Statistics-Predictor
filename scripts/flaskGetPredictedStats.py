@@ -185,7 +185,7 @@ def givePlayerStats(playerLink,position):
     
     predicted_player_stats["EPM"] = format_stat(
         {
-            "prediction": predicted_player_stats["OPM"]["value"] + predicted_player_stats["OPM"]["value"],
+            "prediction": predicted_player_stats["OPM"]["value"] + predicted_player_stats["DPM"]["value"],
             "comparison": "Above Avg" if (predicted_player_stats["OPM"]["value"] + predicted_player_stats["DPM"]["value"]) > 0.0 else "Below Avg"
         }
     )
