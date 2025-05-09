@@ -1,5 +1,7 @@
 # Player Statistics Predictor
 
+Website: https://player-statistics-predictor.onrender.com/
+
 Player Statistics Predictor is a Python-based project designed to predict season statistics for players in an online college basketball game (http://onlinecollegebasketball.org). By leveraging web scraping, data preprocessing, and machine learning techniques, this project aims to provide accurate predictions of player performance metrics.
 
 ## Features
@@ -17,25 +19,11 @@ Player Statistics Predictor is a Python-based project designed to predict season
   - Scikit-Learn (Machine learning)
   - Pandas (Data manipulation and analysis)
 
-## Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/brherold/Player-Statistics-Predictor.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd Player-Statistics-Predictor
-   ```
-3. Install the required Python libraries:
-   ```bash
-   pip install beautifulsoup4 scikit-learn pandas
-   ```
-
 ## Usage
-1. **Make predictions** for player stats:
-   ```bash
-   python getPredictedStats.py
-   ```
 
+1. **Make predictions** for player stats:  
+   [https://player-statistics-predictor.onrender.com/](https://player-statistics-predictor.onrender.com/)
+
+2. **Input a player URL** from [http://onlinecollegebasketball.org](http://onlinecollegebasketball.org)  
+   Example: `http://onlinecollegebasketball.org/player/198167`
 
