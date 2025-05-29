@@ -19,12 +19,12 @@ from sklearn.feature_selection import RFE
 
 
 #df = pd.read_csv("DataCSVS/cleanedPlayerData41-42-43.csv", encoding='latin1')
-df_total = pd.read_csv("DataCSVS/44-45-Cleaned.csv", encoding='latin1')
-df_PG = pd.read_csv("DataCSVS/PG-Cleaned.csv", encoding='latin1')
-df_SG = pd.read_csv("DataCSVS/SG-Cleaned.csv", encoding='latin1')
-df_SF = pd.read_csv("DataCSVS/SF-Cleaned.csv", encoding='latin1')
-df_Perimeter = pd.read_csv("DataCSVS/Perimeter-Cleaned.csv", encoding='latin1')
-df_Bigs = pd.read_csv("DataCSVS/Bigs-Cleaned.csv", encoding='latin1')
+df_total = pd.read_csv("DataCSVS/44-45-per56.csv", encoding='latin1')
+df_PG = pd.read_csv("DataCSVS/PG-per56.csv", encoding='latin1')
+df_SG = pd.read_csv("DataCSVS/SG-per56.csv", encoding='latin1')
+df_SF = pd.read_csv("DataCSVS/SF-per56.csv", encoding='latin1')
+df_Perimeter = pd.read_csv("DataCSVS/Perimeter-per56.csv", encoding='latin1')
+df_Bigs = pd.read_csv("DataCSVS/Bigs-per56.csv", encoding='latin1')
 
 
 def finishing(df):
@@ -669,7 +669,7 @@ freeThrowShooting(df_total)
 threePointOFG(df_Perimeter)
 
 for position in ["Perimeter","Bigs"]:
-    df = pd.read_csv(f"DataCSVS/{position}-Cleaned.csv")
+    df = pd.read_csv(f"DataCSVS/{position}-per56.csv")
     insideShot(position,df)
     blocks(position,df)
     twoPointOFG(position,df)
@@ -681,7 +681,7 @@ for position in ["Perimeter","Bigs"]:
 
 
 for position in ["PG","SG","SF","Bigs"]:
-    df = pd.read_csv(f"DataCSVS/{position}-Cleaned.csv")
+    df = pd.read_csv(f"DataCSVS/{position}-per56.csv")
     rebounding(position,df)
     assists(position,df)
     steals(position,df)
