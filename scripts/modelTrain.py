@@ -19,7 +19,7 @@ from sklearn.feature_selection import RFE
 
 
 #df = pd.read_csv("DataCSVS/cleanedPlayerData41-42-43.csv", encoding='latin1')
-df_total = pd.read_csv("DataCSVS/44-45-per56.csv", encoding='latin1')
+df_total = pd.read_csv("DataCSVS/44Seniors-45-per56.csv", encoding='latin1')
 df_PG = pd.read_csv("DataCSVS/PG-per56.csv", encoding='latin1')
 df_SG = pd.read_csv("DataCSVS/SG-per56.csv", encoding='latin1')
 df_SF = pd.read_csv("DataCSVS/SF-per56.csv", encoding='latin1')
@@ -117,7 +117,7 @@ def insideShot(position, df):
 
 def midRange(df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'OS', 'Rng',
-        'Spd', 'Sta',
+        'Spd', 'Sta', 'Str',
             'MR_P']
 
     df = df[df['MR_A'] >= 2]
@@ -159,7 +159,7 @@ def midRange(df):
    
 def threePointShooting(df):
     features = ['height', 'weight', 'wingspan', 'vertical','OS', 'Rng', 
-            'IQ', 'Spd', 'Sta',
+            'IQ', 'Spd', 'Sta', 'Str',
             '_3P_P']
 
     df = df[df['_3P_A'] >= 4]
@@ -197,7 +197,7 @@ def threePointShooting(df):
     joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/3P.pkl')
 
 def freeThrowShooting(df):
-    features = ['height', 'weight', 'wingspan', 'vertical', 'OS', 'FT_P']
+    features = ['height', 'weight', 'wingspan', 'vertical', 'OS', 'Str', 'FT_P']
 
     df = df[df['FT_A'] >= 2]
 
@@ -467,7 +467,7 @@ def twoPointOFG(position, df):
 def threePointOFG(df):
 
     features = ['height', 'wingspan', 'vertical',
-            'PDef', 'IQ','Spd', 'Sta',
+            'PDef', 'IQ','Spd', 'Sta', 'Str',
             'O_3P_P']
 
     df = df[df['O_3P_A'] >= 4] #Use Perimeter (for both)
