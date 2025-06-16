@@ -1,138 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hardwood Stats Predictor</title>
-    <style>
-        /* Full Page Styling */
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hardwood Stats Predictor</title>
+  <style>
+    :root {
+      --bg-dark: rgb(29, 30, 34);
+      --bg-medium: #1e1f23;
+      --input-bg: #25262a;
+      --fg-light: #e0e0e0;
+      --fg-muted: #888;
+      --border: #444;
+      --btn-bg: #007BFF;
+      --btn-bg-hover: #0056b3;
+    }
 
-        /* Main Card Container */
-        #main {
-            width: 90%;
-            max-width: 500px;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
-            box-sizing: border-box;
-        }
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--fg-light);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
 
-        #title h1 {
-            font-size: 1.8em;
-            margin-bottom: 15px;
-        }
+    #main {
+      width: 90%;
+      max-width: 500px;
+      padding: 25px 30px;
+      background-color: var(--bg-medium);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      box-sizing: border-box;
+    }
 
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+    #title h1 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: var(--fg-light);
+    }
 
-        /* Player Position Selection */
-        .position-label {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-        .radio-group {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            flex-wrap: wrap; 
-        }
+    .position-label {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--fg-light);
+    }
 
-        label {
-            font-size: 1em;
-            white-space: nowrap; 
-        }
+    .radio-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      background: var(--input-bg);
+      padding: 12px 15px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
 
-        /* Input Fields */
-        input[type="url"] {
-            padding: 10px;
-            font-size: 1em;
-            width: 90%;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: .8em;
-        }
+    label {
+      font-size: 1em;
+      white-space: nowrap;
+      color: var(--fg-light);
+      cursor: pointer;
+      user-select: none;
+    }
 
-        /* Submit Button */
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px;
-            font-size: 1.1em;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+    input[type="radio"] {
+      margin-right: 6px;
+      cursor: pointer;
+    }
 
-        button:hover {
-            background-color: #0056b3;
-            transform: scale(0.98);
-        }
+    input[type="url"] {
+      padding: 12px 15px;
+      font-size: 1em;
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background-color: var(--input-bg);
+      color: var(--fg-light);
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
 
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .radio-group {
-                flex-direction: column; 
-                gap: 10px;
-            }
-        }
-    </style>
+    input[type="url"]::placeholder {
+      color: var(--fg-muted);
+    }
+
+    input[type="url"]:focus {
+      outline: none;
+      border-color: var(--btn-bg);
+      background-color: #303136;
+    }
+
+    button {
+      background-color: var(--btn-bg);
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1.1em;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      font-weight: bold;
+      user-select: none;
+    }
+
+    button:hover {
+      background-color: var(--btn-bg-hover);
+      transform: scale(0.98);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .radio-group {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-
-    <div id="main">
-        <div id="title">
-            <h1>Hardwood Player Stat Predictor</h1>
-        </div>
-        
-        <form method="post">
-            <p class="position-label">Select Player Position</p>
-            <div class="radio-group">
-                <label>
-                    <input type="radio" name="position" value="PG" checked="checked"> PG
-                </label>
-                <label>
-                    <input type="radio" name="position" value="SG" checked="checked"> SG
-                </label>
-                <label>
-                    <input type="radio" name="position" value="SF" checked="checked"> SF
-                </label>
-                <label>
-                    <input type="radio" name="position" value="PF" checked="checked"> PF
-                </label>
-                <label>
-                    <input type="radio" name="position" value="C"> C
-                </label>
-            </div>
-            <input type="url" name="url" placeholder="Enter Player URL">
-            <button type="submit">Submit</button>
-        </form>
+  <div id="main">
+    <div id="title">
+      <h1>Hardwood Player Stat Predictor</h1>
     </div>
 
+    <form method="post">
+      <p class="position-label">Select Player Position</p>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="position" value="PG" checked /> PG
+        </label>
+        <label>
+          <input type="radio" name="position" value="SG" checked /> SG
+        </label>
+        <label>
+          <input type="radio" name="position" value="SF" checked /> SF
+        </label>
+        <label>
+          <input type="radio" name="position" value="PF" checked /> PF
+        </label>
+        <label>
+          <input type="radio" name="position" value="C" /> C
+        </label>
+      </div>
+      <input type="url" name="url" placeholder="Enter Player URL" />
+      <button type="submit">Submit</button>
+    </form>
+  </div>
 </body>
 </html>

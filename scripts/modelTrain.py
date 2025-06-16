@@ -66,7 +66,7 @@ def finishing(df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/FIN.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Models-NoD/FIN.pkl')
 
 
 def insideShot(position, df):
@@ -113,7 +113,7 @@ def insideShot(position, df):
 
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/IS_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Models-NoD/IS_{position}.pkl')
 
     
 
@@ -155,7 +155,7 @@ def midRange(df):
     
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/MR.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Models-NoD/MR.pkl')
 
     
    
@@ -196,7 +196,7 @@ def threePointShooting(df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/3P.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Models-NoD/3P.pkl')
 
 def freeThrowShooting(df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'OS', 'FT_P']
@@ -232,7 +232,7 @@ def freeThrowShooting(df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/FT.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/FT.pkl')
 
 def rebounding(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS',
@@ -269,7 +269,7 @@ def rebounding(position, df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/RebP_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/RebP_{position}.pkl')
 
 def assists(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
@@ -307,7 +307,7 @@ def assists(position, df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/Ast_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/Ast_{position}.pkl')
 
 def steals(position, df):
     features = ['height', 'wingspan', 'vertical', 
@@ -345,7 +345,7 @@ def steals(position, df):
     avg_pred_value = np.mean(y_pred_test)
     
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/Stl_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/Stl_{position}.pkl')
 
 def blocks(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical',
@@ -382,7 +382,7 @@ def blocks(position, df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/Blk_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/Blk_{position}.pkl')
 
 #Assist to Turnover Ratio
 def ast_to(position, df):
@@ -424,7 +424,7 @@ def ast_to(position, df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/AST-TO_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/AST-TO_{position}.pkl')
 
 def twoPointOFG(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical',
@@ -461,7 +461,7 @@ def twoPointOFG(position, df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/2OF%_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/2OF%_{position}.pkl')
 
 
 
@@ -504,7 +504,7 @@ def threePointOFG(df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/3OF%.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Models-NoD/3OF%.pkl')
 
 def foulsDrawn(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
@@ -541,7 +541,7 @@ def foulsDrawn(position, df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/FD_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/FD_{position}.pkl')
 
 def OBPM(position,df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
@@ -578,7 +578,7 @@ def OBPM(position,df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/OBPM_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Models-NoD/OBPM_{position}.pkl')
 
 
 
@@ -618,7 +618,7 @@ def DBPM(position,df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value), f'Models-NoD/DBPM_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/DBPM_{position}.pkl')
 
 
 def BPM(position,df):
@@ -656,7 +656,7 @@ def BPM(position,df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value), f'Models-NoD/BPM_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Models-NoD/BPM_{position}.pkl')
 
 
 #Model Training

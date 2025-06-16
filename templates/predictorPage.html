@@ -1,197 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{position}} - {{ player_name }}</title>
-    <style>
-        /* Full Page Styling */
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            overflow-x: auto; 
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{position}} - {{ player_name }}</title>
+  <style>
+    :root {
+      --bg-dark: rgb(29, 30, 34);
+      --bg-medium: #1e1f23;
+      --cell-bg: #25262a;
+      --header-bg: #2e2f33;
+      --fg-light: #e0e0e0;
+      --fg-muted: #888;
+      --border: #444;
+    }
 
-        #main {
-            width: 100%;
-            max-width: 1500px; 
-            padding: 30px; 
-            background-color: #ffffff;
-            border-radius: 5px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            box-sizing: border-box;
-            overflow-x: auto; 
-        }
-        
-        #title h1 {
-            font-size: 2em; 
-            margin: 10px 0;
-        }
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--fg-light);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow-x: auto;
+    }
 
-        a {
-            color: #007BFF;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
+    #main {
+      width: 100%;
+      max-width: 1500px;
+      padding: 30px;
+      background-color: var(--bg-medium);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
 
-        a:hover {
-            color: #214d7c;
-        }
+    #title h1 {
+      font-size: 2em;
+      margin: 10px 0;
+    }
 
-        .table-container {
-            max-width: 100%;
-            overflow-x: auto;
-            margin-top: 10px;
-        }
+    a {
+      color: #4da6ff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
 
-        .stats-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: auto;
-        }
+    a:hover {
+      color: #82c1ff;
+    }
 
-        .stats-table th, .stats-table td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: center;
-            white-space: nowrap;
-        }
+    .table-container {
+      max-width: 100%;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
 
-        .stats-table th {
-            background-color: #e0e0e0;
-            font-size: 0.85em;
-            font-weight: bold;
-        }
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: auto;
+    }
 
-        .stats-table td {
-            background-color: #f9f9f9;
-            font-size: 0.85em;
-        }
-        
-        /* Home Button Styling */
-        .home-button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 1em;
-            font-weight: bold;
-            color: #ffffff;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            text-decoration: none;
-        }
+    .stats-table th, .stats-table td {
+      padding: 10px;
+      border: 1px solid var(--border);
+      text-align: center;
+      white-space: nowrap;
+    }
 
-        .home-button:hover {
-            background-color: #0056b3;
-            transform: scale(0.98);
-        }
+    .stats-table th {
+      background-color: var(--header-bg);
+      color: var(--fg-light);
+      font-size: 0.85em;
+      font-weight: bold;
+    }
 
-        /* Responsive Fixes */
-        @media (max-width: 900px) {
-            .stats-table th, .stats-table td {
-                font-size: 0.9em;
-                padding: 6px;
-            }
-        }
+    .stats-table th span {
+      margin-left: 4px;
+      cursor: help;
+      font-size: 0.9em;
+    }
 
-        @media (max-width: 700px) {
-            .stats-table th, .stats-table td {
-                font-size: 0.8em;
-                padding: 5px;
-            }
-        }
+    .stats-table td {
+      background-color: var(--cell-bg);
+      color: var(--fg-light);
+      font-size: 0.85em;
+    }
 
-        @media (max-width: 550px) {
-            .stats-table th, .stats-table td {
-                font-size: 0.75em;
-                padding: 4px;
-            }
-        }
-    </style>
+    .stats-table td div:first-child {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .stats-table td div:last-child {
+      font-weight: normal;
+      font-size: 0.8em;
+      color: var(--fg-muted);
+    }
+
+    .home-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      font-weight: bold;
+      color: #ffffff;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      text-decoration: none;
+    }
+
+    .home-button:hover {
+      background-color: #0056b3;
+      transform: scale(0.98);
+    }
+
+    /* Responsive Fixes */
+    @media (max-width: 900px) {
+      .stats-table th, .stats-table td {
+        font-size: 0.9em;
+        padding: 6px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .stats-table th, .stats-table td {
+        font-size: 0.8em;
+        padding: 5px;
+      }
+    }
+
+    @media (max-width: 550px) {
+      .stats-table th, .stats-table td {
+        font-size: 0.75em;
+        padding: 4px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div id="main">
-
+  <div id="main">
     <h1><a href="{{ player_url }}" target="_blank">{{ player_name }}</a></h1>
-    <p>Position: 
-        {% if position == "PG" %}
-            PG
-        {% elif position == "SG" %}
-            SG
-        {% elif position == "SF" %}
-            SF
-        {% elif position == "PF" %}
-            PF
-        {% else %}
-            C
-        {% endif %}
+    <p>Position:
+      {% if position == "PG" %}
+        PG
+      {% elif position == "SG" %}
+        SG
+      {% elif position == "SF" %}
+        SF
+      {% elif position == "PF" %}
+        PF
+      {% else %}
+        C
+      {% endif %}
     </p>
 
-
-    <!-- Table Container for Scrolling -->
     <div class="table-container">
-        <table class="stats-table">
-            <thead>
-                <tr>
-                    {% for stat in stats.keys() %}
-                        {% if stat == "OPM" %}
-                            <th title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">
-                                {{ stat }} <span title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">ℹ️</span>
-                            </th>
-                        {% elif stat == "DPM" %}
-                            <th title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">
-                                {{ stat }} <span title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">ℹ️</span>
-                            </th>
-                        {% elif stat == "EPM" %}
-                            <th title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">
-                                {{ stat }} <span title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">ℹ️</span>
-                            </th>
-                        {% else %}
-                            <th>{{ stat }}</th>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-            </thead>
-            
-            <tbody>
-                <tr>
-                    {% for stat, value in stats.items() %}
-                        <td style="color:
-                        {% if stat == 'O2P%' or stat == 'O3P%' %}
-                            {% if value.comparison == 'Below Avg' %}green
-                            {% elif value.comparison == 'Above Avg' %}red
-                            {% else %}gray
-                            {% endif %}
-                        {% else %}
-                            {% if value.comparison == 'Above Avg' %}green
-                            {% elif value.comparison == 'Below Avg' %}red
-                            {% else %}gray
-                            {% endif %}
-                        {% endif %};
-                        font-weight: bold;">
-                            {{ value.value }}
-                        </td>
-                    {% endfor %}
-                </tr>
-                
-            </tbody>
-        </table>
-            <p> Per 30 Mins </p>
-        <a href="{{ url_for('home') }}" class="home-button">Home</a>
+      <table class="stats-table">
+        <thead>
+          <tr>
+            {% for stat in stats.keys() %}
+              {% if stat == "OPM" %}
+                <th title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">
+                  {{ stat }} <span>ℹ️</span>
+                </th>
+              {% elif stat == "DPM" %}
+                <th title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">
+                  {{ stat }} <span>ℹ️</span>
+                </th>
+              {% elif stat == "EPM" %}
+                <th title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">
+                  {{ stat }} <span>ℹ️</span>
+                </th>
+              {% else %}
+                <th>{{ stat }}</th>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {% for stat, value in stats.items() %}
+              <td>
+                <div>
+                  {% if "PM" in stat and value.value > 0 %}
+                    +{{ value.value }}
+                  {% else %}
+                    {{ value.value }}
+                  {% endif %}
+                </div>
+                <div style="color: {{ value.color }};">
+                  {{ value.percentile }}
+                </div>
+              </td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+      <p>Per 30 Mins</p>
+      <a href="{{ url_for('home') }}" class="home-button">Home</a>
     </div>
-
-</div>
+  </div>
 </body>
 </html>

@@ -1,109 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error - Invalid URL</title>
-    <style>
-        /* Full Page Styling */
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            overflow-x: auto; 
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Error - Invalid URL</title>
+  <style>
+    :root {
+      --bg-dark: rgb(29, 30, 34);
+      --bg-medium: #1e1f23;
+      --fg-light: #e0e0e0;
+      --fg-muted: #888;
+      --border: #444;
+      --error-red: #d9534f;
+      --btn-bg: #007BFF;
+      --btn-bg-hover: #0056b3;
+      --btn-bg-active: #004494;
+      --link-color: #66aaff;
+    }
 
-        /* Error Container */
-        .error-container {
-            width: 100%;
-            max-width: 500px;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
-            box-sizing: border-box;
-        }
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--fg-light);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow-x: auto;
+    }
 
-        .error-container h1 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-            color: #d9534f; /* error red */
-        }
+    .error-container {
+      width: 90%;
+      max-width: 500px;
+      padding: 25px 30px;
+      background-color: var(--bg-medium);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      box-sizing: border-box;
+    }
 
-        .error-container p {
-            font-size: 1em;
-            margin-bottom: 20px;
-        }
+    .error-container h1 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: var(--error-red);
+      font-weight: bold;
+    }
 
-        /* Home Button Styling */
-        .home-button {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 1em;
-            font-weight: bold;
-            color: #ffffff;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            text-decoration: none;
-        }
+    .error-container p {
+      font-size: 1em;
+      margin-bottom: 25px;
+      color: var(--fg-light);
+      line-height: 1.4;
+    }
 
-        .home-button:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
-        }
+    .error-container a {
+      color: var(--link-color);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    .error-container a:hover {
+      color: #a3cdfd;
+    }
 
-        .home-button:active {
-            background-color: #004494;
-            transform: scale(0.98);
-        }
+    .home-button {
+      display: inline-block;
+      padding: 12px 25px;
+      font-size: 1em;
+      font-weight: bold;
+      color: #ffffff;
+      background-color: var(--btn-bg);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      text-decoration: none;
+      user-select: none;
+    }
 
-        /* Responsive Fixes */
-        @media (max-width: 700px) {
-            .error-container {
-                padding: 15px;
-            }
+    .home-button:hover {
+      background-color: var(--btn-bg-hover);
+      transform: scale(1.05);
+    }
 
-            .error-container h1 {
-                font-size: 1.25em;
-            }
+    .home-button:active {
+      background-color: var(--btn-bg-active);
+      transform: scale(0.98);
+    }
 
-            .error-container p {
-                font-size: 0.9em;
-            }
-        }
+    /* Responsive */
+    @media (max-width: 700px) {
+      .error-container {
+        padding: 20px 25px;
+      }
 
-        @media (max-width: 500px) {
-            .error-container {
-                padding: 10px;
-            }
+      .error-container h1 {
+        font-size: 1.3em;
+      }
 
-            .error-container h1 {
-                font-size: 1.1em;
-            }
+      .error-container p {
+        font-size: 0.95em;
+      }
+    }
 
-            .error-container p {
-                font-size: 0.85em;
-            }
-        }
-    </style>
+    @media (max-width: 500px) {
+      .error-container {
+        padding: 15px 20px;
+      }
+
+      .error-container h1 {
+        font-size: 1.1em;
+      }
+
+      .error-container p {
+        font-size: 0.85em;
+      }
+    }
+  </style>
 </head>
 <body>
-
-    <div class="error-container">                                           
-        <h1>Error: Invalid URL</h1>
-        <p>Please enter a valid player URL from Hardwood ("<strong><a href="http://onlinecollegebasketball.org/" target="_blank">onlinecollegebasketball.org</a></strong>").</p>
-        <a href="{{ url_for('home') }}" class="home-button">Return Home</a>
-    </div>
-
+  <div class="error-container">
+    <h1>Error: Invalid URL</h1>
+    <p>
+      Please enter a valid player URL from Hardwood
+      (<strong
+        ><a href="http://onlinecollegebasketball.org/" target="_blank"
+          >onlinecollegebasketball.org</a
+        ></strong
+      >).
+    </p>
+    <a href="{{ url_for('home') }}" class="home-button">Return Home</a>
+  </div>
 </body>
 </html>
