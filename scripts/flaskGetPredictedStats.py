@@ -69,7 +69,6 @@ def givePlayerStats(playerLink,position):
     position = position.upper()
 
     if position in ["PF", "C"]:
-        position = "Bigs"
         position_group = "Bigs"
         
 
@@ -100,8 +99,8 @@ def givePlayerStats(playerLink,position):
     rebp_scaler, rebp_pca, rebp_model, rebp_expected_columns, rebp_avg_pred = load_model_components(f"RebP_{position}")
     ast_scaler, ast_pca, ast_model, ast_expected_columns, ast_avg_pred = load_model_components(f"Ast_{position}")
     stl_scaler, stl_pca, stl_model, stl_expected_columns, stl_avg_pred = load_model_components(f"Stl_{position}")
-    blk_scaler, blk_pca, blk_model, blk_expected_columns, blk_avg_pred = load_model_components(f"Blk_{position_group}")
-    twoof_scaler, twoof_pca, twoof_model, twoof_expected_columns, twoof_avg_pred = load_model_components(f"2OF%_{position_group}")
+    blk_scaler, blk_pca, blk_model, blk_expected_columns, blk_avg_pred = load_model_components(f"Blk_{position}")
+    twoof_scaler, twoof_pca, twoof_model, twoof_expected_columns, twoof_avg_pred = load_model_components(f"2OF%_{position}")
     threeof_scaler, threeof_pca, threeof_model, threeof_expected_columns, threeof_avg_pred = load_model_components(f"3OF%")
     fd_scaler, fd_pca, fd_model, fd_expected_columns, fd_avg_pred = load_model_components(f"FD_{position}")
     ast_to_scaler, ast_to_pca, ast_to_model, ast_to_expected_columns, ast_to_avg_pred = load_model_components(f"AST-TO_{position}")
@@ -193,7 +192,7 @@ def givePlayerStats(playerLink,position):
     
     return player_name, predicted_player_stats
 
-#print(givePlayerStats("http://onlinecollegebasketball.org/prospect/202447","PG"))
+#print(givePlayerStats("https://onlinecollegebasketball.org/player/211944/A","PF"))
 
             
 

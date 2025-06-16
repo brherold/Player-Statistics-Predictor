@@ -19,10 +19,12 @@ from sklearn.feature_selection import RFE
 
 
 #df = pd.read_csv("DataCSVS/cleanedPlayerData41-42-43.csv", encoding='latin1')
-df_total = pd.read_csv("DataCSVS/44-45-per56.csv", encoding='latin1')
+df_total = pd.read_csv("DataCSVS/2045-per56.csv", encoding='latin1')
 df_PG = pd.read_csv("DataCSVS/PG-per56.csv", encoding='latin1')
 df_SG = pd.read_csv("DataCSVS/SG-per56.csv", encoding='latin1')
 df_SF = pd.read_csv("DataCSVS/SF-per56.csv", encoding='latin1')
+df_PF = pd.read_csv("DataCSVS/PF-per56.csv", encoding='latin1')
+df_C = pd.read_csv("DataCSVS/C-per56.csv", encoding='latin1')
 df_Perimeter = pd.read_csv("DataCSVS/Perimeter-per56.csv", encoding='latin1')
 df_Bigs = pd.read_csv("DataCSVS/Bigs-per56.csv", encoding='latin1')
 
@@ -671,8 +673,7 @@ threePointOFG(df_Perimeter)
 for position in ["Perimeter","Bigs"]:
     df = pd.read_csv(f"DataCSVS/{position}-per56.csv")
     insideShot(position,df)
-    blocks(position,df)
-    twoPointOFG(position,df)
+    
 
 
 
@@ -680,12 +681,14 @@ for position in ["Perimeter","Bigs"]:
 
 
 
-for position in ["PG","SG","SF","Bigs"]:
+for position in ["PG","SG","SF","PF",'C']:
     df = pd.read_csv(f"DataCSVS/{position}-per56.csv")
     rebounding(position,df)
     assists(position,df)
     steals(position,df)
+    blocks(position,df)
     ast_to(position,df)
+    twoPointOFG(position,df)
     foulsDrawn(position,df)
     OBPM(position,df)
     DBPM(position,df)
