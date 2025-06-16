@@ -30,6 +30,7 @@
     }
 
     #main {
+      position: relative; /* add this line */
       width: 100%;
       max-width: 1500px;
       padding: 30px;
@@ -129,6 +130,39 @@
       transform: scale(0.98);
     }
 
+    .gradient-bar-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      max-width: 150px; /* Adjust as needed */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .gradient-labels {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .gradient-label-left,
+    .gradient-label-right {
+      font-size: 0.75em;
+      color: var(--fg-muted);
+    }
+
+    .gradient-bar {
+      margin-top: 2px;
+      width: 100%;
+      height: 7px;
+      background-image: linear-gradient(to right, rgb(240, 67, 67), rgb(70, 70, 75), rgb(70, 70, 75), rgb(2, 143, 103));
+      border-radius: 4px;
+    }
+
+
     /* Responsive Fixes */
     @media (max-width: 900px) {
       .stats-table th, .stats-table td {
@@ -210,10 +244,22 @@
             {% endfor %}
           </tr>
         </tbody>
+        
       </table>
       <p>Per 30 Mins</p>
+      
+      
       <a href="{{ url_for('home') }}" class="home-button">Home</a>
+      
     </div>
+    <div class="gradient-bar-container">
+      <div class="gradient-labels">
+        <span class="gradient-label-left">Bad</span>
+        <span class="gradient-label-right">Good</span>
+      </div>
+      <div class="gradient-bar"></div>
+    </div>
+    
   </div>
 </body>
 </html>
