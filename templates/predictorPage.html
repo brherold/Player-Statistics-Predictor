@@ -66,11 +66,15 @@
       width: 100%;
       border-collapse: collapse;
       table-layout: auto;
+      
     }
 
     .stats-table th, .stats-table td {
       padding: 10px;
-      border: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      border-left: none;
+      border-right: none;
       text-align: center;
       white-space: nowrap;
     }
@@ -172,15 +176,15 @@
             {% for stat in stats.keys() %}
               {% if stat == "OPM" %}
                 <th title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">
-                  {{ stat }} <span>ℹ️</span>
+                  {{ stat }}<span>ℹ️</span>
                 </th>
               {% elif stat == "DPM" %}
                 <th title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">
-                  {{ stat }} <span>ℹ️</span>
+                  {{ stat }}<span>ℹ️</span>
                 </th>
               {% elif stat == "EPM" %}
                 <th title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">
-                  {{ stat }} <span>ℹ️</span>
+                  {{ stat }}<span>ℹ️</span>
                 </th>
               {% else %}
                 <th>{{ stat }}</th>
@@ -199,7 +203,7 @@
                     {{ value.value }}
                   {% endif %}
                 </div>
-                <div style="color: {{ value.color }};">
+                <div style="color: {{ value.color }}; font-weight: bold;">
                   {{ value.percentile }}
                 </div>
               </td>

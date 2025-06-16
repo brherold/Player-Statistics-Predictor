@@ -154,22 +154,22 @@ def givePlayerStats(playerLink,position):
     predicted_player_stats = {}
 
     # Predict and store stats
-    predicted_player_stats["Finishing%"] = format_stat(
+    predicted_player_stats["Fin%"] = format_stat(
         preprocess_and_predict(df, player, fin_scaler, fin_pca, fin_model, fin_expected_columns, fin_avg_pred),
         percent=True
     )
 
-    predicted_player_stats["InsideShot%"] = format_stat(
+    predicted_player_stats["IS%"] = format_stat(
         preprocess_and_predict(df, player, is_scaler, is_pca, is_model, is_expected_columns, is_avg_pred),
         percent=True
     )
 
-    predicted_player_stats["MidRange%"] = format_stat(
+    predicted_player_stats["Mid%"] = format_stat(
         preprocess_and_predict(df, player, mr_scaler, mr_pca, mr_model, mr_expected_columns, mr_avg_pred),
         percent=True
     )
 
-    predicted_player_stats["3P%"] = format_stat(
+    predicted_player_stats["3PT%"] = format_stat(
         preprocess_and_predict(df, player, tp_scaler, tp_pca, tp_model, tp_expected_columns, tp_avg_pred),
         percent=True
     )
@@ -179,23 +179,23 @@ def givePlayerStats(playerLink,position):
         percent=True
     )
 
-    predicted_player_stats["Reb/G"] = format_stat(
+    predicted_player_stats["Reb"] = format_stat(
         preprocess_and_predict(df, player, rebp_scaler, rebp_pca, rebp_model, rebp_expected_columns, rebp_avg_pred)
     )
 
-    predicted_player_stats["Ast/G"] = format_stat(
+    predicted_player_stats["Ast"] = format_stat(
         preprocess_and_predict(df, player, ast_scaler, ast_pca, ast_model, ast_expected_columns, ast_avg_pred)
     )
 
-    predicted_player_stats["Stl/G"] = format_stat(
+    predicted_player_stats["Stl"] = format_stat(
         preprocess_and_predict(df, player, stl_scaler, stl_pca, stl_model, stl_expected_columns, stl_avg_pred)
     )
 
-    predicted_player_stats["Blk/G"] = format_stat(
+    predicted_player_stats["Blk"] = format_stat(
         preprocess_and_predict(df, player, blk_scaler, blk_pca, blk_model, blk_expected_columns, blk_avg_pred)
     )
 
-    predicted_player_stats["FD/G"] = format_stat(
+    predicted_player_stats["FD"] = format_stat(
         preprocess_and_predict(df, player, fd_scaler, fd_pca, fd_model, fd_expected_columns, fd_avg_pred)
     )
 
@@ -203,12 +203,12 @@ def givePlayerStats(playerLink,position):
         preprocess_and_predict(df, player, ast_to_scaler, ast_to_pca, ast_to_model, ast_to_expected_columns, ast_to_avg_pred)
     )
 
-    predicted_player_stats["O2P%"] = format_stat(
+    predicted_player_stats["O2%"] = format_stat(
         preprocess_and_predict(df, player, twoof_scaler, twoof_pca, twoof_model, twoof_expected_columns, twoof_avg_pred,opposite_comparison=True),
         percent=True
     )
 
-    predicted_player_stats["O3P%"] = format_stat(
+    predicted_player_stats["O3%"] = format_stat(
         preprocess_and_predict(df, player, threeof_scaler, threeof_pca, threeof_model, threeof_expected_columns, threeof_avg_pred,opposite_comparison=True),
         percent=True
     )
