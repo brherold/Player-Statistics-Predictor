@@ -1,5 +1,5 @@
 import pandas as pd
-from scripts.pygetPlayerSkills import get_player_info
+
 
 import joblib
 
@@ -97,7 +97,7 @@ def format_stat(pred, percent=False):
         "color": pred["color"]
     }
 
-def givePlayerStats(playerLink,position):
+def givePlayerStats(player,position):
     
     position = position.upper()
 
@@ -111,12 +111,6 @@ def givePlayerStats(playerLink,position):
 
     elif position == "SF":
         position_group = "Perimeter"
-        
-    
-    player = get_player_info(playerLink)
-    player_name = player["Name"]
-
-    del player["Name"]
 
     # Convert Player Dictionary to DF
     player_df = pd.DataFrame([player])
@@ -231,7 +225,7 @@ def givePlayerStats(playerLink,position):
     )
 
     
-    return player_name, predicted_player_stats
+    return predicted_player_stats
 
 #print(givePlayerStats("https://onlinecollegebasketball.org/player/205173/A","SG"))
 
