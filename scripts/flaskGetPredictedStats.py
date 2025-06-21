@@ -118,6 +118,7 @@ def givePlayerStats(playerLink,position):
 
     del player["Name"]
 
+
     # Convert Player Dictionary to DF
     player_df = pd.DataFrame([player])
 
