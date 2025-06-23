@@ -91,6 +91,12 @@ def transform_player_data(input_data):
     output_data["weight"] = output_data['Weight']
     output_data["vertical"] = output_data["Vertical_float"]
 
+    del output_data["Height_inches"]
+    del output_data["Wingspan_inches"]
+    del output_data["Weight"]
+    del output_data["Vertical_float"]
+
+
 
     
     return output_data

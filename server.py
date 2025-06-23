@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from scripts.CustomGetPredictedStats import *
+from scripts.pygetPlayerSkills import *
 import json
 
 app = Flask(__name__)
@@ -18,6 +19,21 @@ def submit():
     predicted_stats = givePlayerStats(data, position)
     #print(predicted_stats)
     return jsonify({"status": "success", "received": predicted_stats})
+
+
+@app.route('/player-url-submit', methods=["POST"])
+def playerUrlSubmit():
+
+    data = request.get_json()
+    print("Received JSON_URL", data)
+
+    player_url = data.get("url")
+
+    player_skills = get_player_info(player_url)
+
+    print(player_skills)
+
+    return jsonify({"message": "Player Skills received successfully", "player_skills": player_skills})
 
 if __name__ == '__main__':
     app.run(debug=True)
