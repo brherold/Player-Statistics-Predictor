@@ -3,6 +3,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from scripts.CustomGetPredictedStats import *
 from scripts.pygetPlayerSkills import *
+from scripts.WeightInputRecruitMeasureable import *
+from RecruitSkillPredictorCol.scripts.getPred_3 import *
 import json
 
 app = Flask(__name__)
@@ -29,7 +31,23 @@ def playerUrlSubmit():
 
     player_url = data.get("url")
 
-    player_skills = get_player_info(player_url)
+    #Check if last String in player_url split is a number (playerCode) or not (could be development page for ex: /D)
+    last_string = player_url.split("/")[-1]
+    player_code = last_string if last_string.isnumeric() else player_url.split("/")[-2]
+
+
+    wanted_year = data.get("player_year")
+    if wanted_year == "Current":
+
+        player_skills = get_player_info(player_url)
+    else:
+        predicted_measureables = getPredictedMeasureables(player_code)
+        wanted_year = wanted_year[-1]
+        predicted_skills = getPredictedSkills(player_code,wanted_year)
+
+        player_skills = {**predicted_measureables, **predicted_skills}
+
+
 
     print(player_skills)
 
