@@ -21,8 +21,16 @@ def home():
             file = request.files.get("htmlFile")
             url_input = request.form.get("url", "").strip()
 
-            # Case 1: file uploaded takes priority if not empty
-            if file and file.filename:
+        
+
+            # Case 1: URL provided
+            if url_input:
+                
+                player_name, predicted_stats, playerID = givePlayerStats(player_url, position)
+                player_url = f"https://onlinecollegebasketball.org/player/{playerID}"
+
+            # Case 2: file uploaded takes priority if not empty
+            elif file and file.filename:
                 
                 file_content = file.read().decode("utf-8", errors="ignore")
                 #print(file_content)
@@ -36,26 +44,16 @@ def home():
 
                 except Exception as e:
                     print(e)
-                    raise
-                
-                
+                    raise    
+            
 
-            # Case 2: URL provided
-            elif url_input:
-                
-                player_name, predicted_stats, playerID = givePlayerStats(player_url, position)
-                player_url = f"https://onlinecollegebasketball.org/player/{playerID}"
-
+            
+            
             else:
                 return render_template("error.html", error="Please provide a URL or upload a file")
 
             #print(predicted_stats)
-            '''
-            print(player_url)
-            print(predicted_stats[0])
-            print(position)
-            print(predicted_stats[1])
-            '''
+
             return render_template(
                 "predictorPage.html",
                 player_url=player_url,
