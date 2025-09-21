@@ -208,15 +208,15 @@
         <thead>
           <tr>
             {% for stat in stats.keys() %}
-              {% if stat == "OPM" %}
+              {% if stat == "OPM+" %}
                 <th title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">
                   {{ stat }}<span>ℹ️</span>
                 </th>
-              {% elif stat == "DPM" %}
+              {% elif stat == "DPM+" %}
                 <th title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">
                   {{ stat }}<span>ℹ️</span>
                 </th>
-              {% elif stat == "EPM" %}
+              {% elif stat == "EPM+" %}
                 <th title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">
                   {{ stat }}<span>ℹ️</span>
                 </th>
@@ -246,7 +246,7 @@
         </tbody>
         
       </table>
-      <p>Per 30 Mins</p>
+      <p>Per 56 Poss</p>
       
       
       <a href="{{ url_for('home') }}" class="home-button">Home</a>

@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+
 #Given URL of player, it gets the measureables (Height, Weight, Wingspan, Vertical) and their skills and puts it into a dic
 
 def split_number_and_letter(s):
@@ -103,12 +104,40 @@ def transform_player_data(input_data):
 
 
 
-def get_player_info(playerURL):
-    page = requests.get(playerURL)
-    soup = BeautifulSoup(page.text, "html.parser")
+from bs4 import BeautifulSoup
+import os
+
+
+
+
+# For Flask App
+def flask_get_player_info(player_html_link, from_file=False):
+    
+    if from_file:
+        soup = BeautifulSoup(player_html_link, "html.parser")
+        
+    else:
+        # fetch HTML from URL here
+        response = requests.get(player_html_link)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+    player_info = {}
+
+    # Extract all table rows
+    fullinfoList = soup.find("table").find_all("tr")
+
+    playerID_search = fullinfoList[0].text.replace("[", " ").replace("]", " ").split(" ")
+    #Search for Player ID (text starts wtih a "#")
+
+    for i, text in enumerate(playerID_search):
+
+        if text and "#" == text[0]:
+            playerID = int(text[1:])
+            break
     
 
-    fullinfoList = soup.find("table").find_all("tr")
+    
+    start_index = end_index = None
     for i in range(len(fullinfoList)):
         if "Age" in fullinfoList[i].text:
             start_index = i
@@ -127,49 +156,57 @@ def get_player_info(playerURL):
             separated = split_number_and_letter(text)
 
         if separated:
-            
-
             if 'Height' in separated[0]:
                 separated = separated[-4:]
             if 'Wingspan' in separated[0]:
                 separated = separated[-4:]
             if 'Vertical' in separated[0]:
                 separated = separated[-4:]
-            
-            # Handle special cases
+
             if 'Weight' in separated[0]:
                 player_info['Weight'] = float(f"{separated[1]}")
-                
                 start_idx = 2
                 separated[start_idx] = separated[start_idx].replace("lbs.","")
-
             else:
                 start_idx = 0
 
-            # Add remaining key-value pairs to the dictionary
             for j in range(start_idx, len(separated), 2):
                 key = separated[j].replace(":", "")
                 if j + 1 < len(separated):
                     value = separated[j + 1]
                     player_info[key] = int(value)
 
+    # Additional conversions
     player_info["Height_inches"] = convert_to_inches(extract_length(split_number_and_letter(infoList[2].text.strip().replace(" ", ""))))
     player_info["Wingspan_inches"] = convert_to_inches(extract_length(split_number_and_letter(infoList[4].text.strip().replace(" ", ""))))
     player_info["Vertical_float"] = Vert_convert_to_inches(extract_length(split_number_and_letter(infoList[5].text.strip().replace(" ", ""))))
 
-
-
-    #Get Player Name
-    soup2 = BeautifulSoup(page.text, "html.parser")
-
+    # Get Player Name
     name_soup = soup.find("h1")
-    name = name_soup.text
+    if name_soup:
+        player_info["Name"] = name_soup.text.strip()
+    else:
+        player_info["Name"] = "Unknown"
 
-    player_info["Name"] = name
     
-    return transform_player_data(player_info)
+    
 
+    return transform_player_data(player_info) , playerID
+'''
+# --- Example usage ---
+html_file = 'scripts\Hardwood - Johnnie Ray Player Profile.html'  # Path to the HTML you manually saved after CAPTCHA
+if os.path.exists(html_file):
+    with open(html_file, "r", encoding="utf-8") as f:
+        html_content = f.read()
 
+    player_data = get_player_info(html_content)
+    print(player_data)
+else:
+    print(f"HTML file not found: {html_file}")
 
-#print(get_player_info("http://onlinecollegebasketball.org/prospect/209437"))
+'''
 
+'''
+player_data = get_player_info(241946)
+print("Player Data:", player_data)
+'''

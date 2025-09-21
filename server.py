@@ -4,7 +4,7 @@ from flask_cors import CORS
 from scripts.CustomGetPredictedStats import *
 from scripts.pygetPlayerSkills import *
 from scripts.WeightInputRecruitMeasureable import *
-from RecruitSkillPredictorCol.scripts.getPred_3 import *
+from RecruitSkillPredictorCol.scripts.getPred_4 import *
 import json
 
 app = Flask(__name__)
@@ -17,6 +17,8 @@ def submit():
 
     position = data["Position"]
     del data["Position"]
+
+    print(data, "XXXXX")
 
     predicted_stats = givePlayerStats(data, position)
     #print(predicted_stats)
@@ -54,7 +56,7 @@ def playerUrlSubmit():
     return jsonify({"message": "Player Skills received successfully", "player_skills": player_skills})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=2000)
 
 
 

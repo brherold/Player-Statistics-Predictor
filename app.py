@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
+
 from scripts.flaskGetPredictedStats import *
 
 import time
@@ -9,18 +10,65 @@ import threading
 app = Flask(__name__)
 
 
-@app.route("/", methods=["GET","POST"])
+@app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
         try:
-            player_url = request.form["url"]
             position = request.form.get("position")
-            predicted_stats = givePlayerStats(player_url,position)
-            return render_template("predictorPage.html", player_url = player_url, player_name = predicted_stats[0], position = position, stats = predicted_stats[1] )
-        except:
-            return render_template("error.html")
+            #predicted_stats = None
+            #player_url = None
+
+            file = request.files.get("htmlFile")
+            url_input = request.form.get("url", "").strip()
+
+            # Case 1: file uploaded takes priority if not empty
+            if file and file.filename:
+                
+                file_content = file.read().decode("utf-8", errors="ignore")
+                #print(file_content)
+                #givePlayerStats("","","")
+                
+                try:
+                    player_name, predicted_stats, playerID = givePlayerStats(file_content, position, from_file=True)
+                    
+                    #print(player_url)
+                    player_url = f"https://onlinecollegebasketball.org/player/{playerID}"
+
+                except Exception as e:
+                    print(e)
+                    raise
+                
+                
+
+            # Case 2: URL provided
+            elif url_input:
+                
+                player_name, predicted_stats, playerID = givePlayerStats(player_url, position)
+                player_url = f"https://onlinecollegebasketball.org/player/{playerID}"
+
+            else:
+                return render_template("error.html", error="Please provide a URL or upload a file")
+
+            #print(predicted_stats)
+            '''
+            print(player_url)
+            print(predicted_stats[0])
+            print(position)
+            print(predicted_stats[1])
+            '''
+            return render_template(
+                "predictorPage.html",
+                player_url=player_url,
+                player_name=player_name,
+                position=position,
+                stats=predicted_stats
+            )
+
+        except Exception as e:
+            return render_template("error.html", error=str(e))
 
     return render_template("home.html")
+
 
     #return 
 

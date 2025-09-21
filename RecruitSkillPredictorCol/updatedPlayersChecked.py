@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import os
-from RecruitSkillPredictorCol.scripts.getPred_3 import *
+from RecruitSkillPredictorCol.scripts.getPred_4 import *
 
 def save_html_to_file(content_bytes, filename):
     # Write raw bytes—use wb to overwrite or ab to append

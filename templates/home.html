@@ -54,10 +54,9 @@
     .position-label {
       font-size: 1.2em;
       font-weight: bold;
-      margin-bottom: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--fg-light);
+      margin: 0;
     }
 
     .radio-group {
@@ -84,7 +83,20 @@
       cursor: pointer;
     }
 
-    input[type="url"] {
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    .input-label {
+      font-weight: bold;
+      font-size: 1em;
+      margin: 0 0 6px 0;
+      color: var(--fg-light);
+    }
+
+    input[type="url"], .file-input-wrapper {
       padding: 12px 15px;
       font-size: 1em;
       width: 100%;
@@ -106,6 +118,40 @@
       background-color: #303136;
     }
 
+    /* Style file input with wrapper */
+    .file-input-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      height: 100%;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .file-input-label {
+      color: var(--fg-muted);
+      font-size: 0.95em;
+    }
+
+    /* Instructions text */
+    .file-instructions {
+      font-size: 0.85em;
+      color: var(--fg-muted);
+      margin-top: 6px;
+      line-height: 1.3;
+      text-align: left;
+    }
+
     button {
       background-color: var(--btn-bg);
       color: white;
@@ -117,6 +163,7 @@
       transition: background 0.3s, transform 0.2s;
       font-weight: bold;
       user-select: none;
+      width: 100%;
     }
 
     button:hover {
@@ -140,28 +187,52 @@
       <h1>Hardwood Player Stat Predictor</h1>
     </div>
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
       <p class="position-label">Select Player Position</p>
       <div class="radio-group">
-        <label>
-          <input type="radio" name="position" value="PG" checked /> PG
-        </label>
-        <label>
-          <input type="radio" name="position" value="SG" checked /> SG
-        </label>
-        <label>
-          <input type="radio" name="position" value="SF" checked /> SF
-        </label>
-        <label>
-          <input type="radio" name="position" value="PF" checked /> PF
-        </label>
-        <label>
-          <input type="radio" name="position" value="C" /> C
-        </label>
+        <label><input type="radio" name="position" value="PG" checked /> PG</label>
+        <label><input type="radio" name="position" value="SG" /> SG</label>
+        <label><input type="radio" name="position" value="SF" /> SF</label>
+        <label><input type="radio" name="position" value="PF" /> PF</label>
+        <label><input type="radio" name="position" value="C" /> C</label>
       </div>
-      <input type="url" name="url" placeholder="Enter Player URL" />
+
+      <div class="form-group">
+        <p class="input-label">Enter Player URL</p>
+        <input type="url" name="url" placeholder="ex: https://onlinecollegebasketball.org/prospect/223193" />
+      </div>
+
+      <div class="form-group">
+        <p class="input-label">Or upload saved player HTML file</p>
+        <div class="file-input-wrapper">
+          <span class="file-input-label">Choose file...</span>
+          <input type="file" name="htmlFile" accept=".html,.htm"
+            onchange="this.previousElementSibling.textContent = this.files[0]?.name || 'Choose file...'" />
+        </div>
+        <p class="file-instructions">
+          Instructions: 
+          Right-click the page or press <strong>Ctrl + S</strong> (Cmd + S on Mac), then choose <strong>Save as type: Webpage, HTML only</strong>.
+        </p>
+      </div>
+
       <button type="submit">Submit</button>
     </form>
   </div>
 </body>
 </html>
+
+
+<script>
+  const fileInput = document.querySelector('input[type="file"][name="htmlFile"]');
+  const fileLabel = fileInput.previousElementSibling;
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+      fileLabel.textContent = fileInput.files[0].name;
+      fileLabel.style.color = '#ffffff';
+    } else {
+      fileLabel.textContent = 'Choose file...';
+      fileLabel.style.color = '#888'; 
+    }
+  });
+</script>
