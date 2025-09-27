@@ -103,7 +103,7 @@ def format_stat(pred, percent=False):
     }
 
 def givePlayerStats(player_html_link,position, from_file=False):
-    
+
     position = position.upper()
 
     if position in ["PF", "C"]:
@@ -251,7 +251,7 @@ def givePlayerStats(player_html_link,position, from_file=False):
 
 
 
-#print(givePlayerStats("https://onlinecollegebasketball.org/player/205173/A","SG"))
+#print(givePlayerStats("https://onlinecollegebasketball.org/player/205173/A","C"))
 
 #run python -m scripts.flaskGetPredictedStats
 

@@ -21,14 +21,18 @@ def home():
             file = request.files.get("htmlFile")
             url_input = request.form.get("url", "").strip()
 
+
         
 
             # Case 1: URL provided
             if url_input:
                 
-                player_name, predicted_stats, playerID = givePlayerStats(player_url, position)
+                
+                player_name, predicted_stats, playerID = givePlayerStats(url_input, position)
+                
                 player_url = f"https://onlinecollegebasketball.org/player/{playerID}"
 
+                #print("Yes")
             # Case 2: file uploaded takes priority if not empty
             elif file and file.filename:
                 
@@ -88,5 +92,5 @@ thread.start()
 
 
 if __name__ == '__main__':
-    app.run()
-    #app.run(port=5002,debug=True)
+    #app.run()
+    app.run(port=5002,debug=True)
