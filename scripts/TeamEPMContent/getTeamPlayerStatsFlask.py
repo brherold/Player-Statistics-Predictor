@@ -133,6 +133,8 @@ def get_team_player_stats(team_stat_html):
 
         if player_GP == 0:
             player_GP = 1
+        
+        player_GS = int(player.find_all("td")[2].text)
             
 
         player_Min_td = player.find_all("td")[3]
@@ -273,13 +275,13 @@ def get_team_player_stats(team_stat_html):
         player_USG_P = round(100 * ((player_FG_A + 0.44 * player_FT_A + player_TO) * (team_Min)) / denom, 1) if denom != 0 else 0
 
 
-
+        player_PTS_per56 = round(float(player_PTS / player_Poss) * 56,1)
 
 
         #VORP_for_EW = round((result[-1] + 3) * (player_Min / (team_Min * 5)) * (player_GP / team_GP),3)
         #EW = round(VORP_for_EW * .0484 * (team_GP),3)
         
-        player_stats_result.append((player_name, player_id, max_Position, player_GP, player_Min, player_PTS,
+        player_stats_result.append((player_name, player_id, max_Position, player_GS, player_GP, player_Min, player_PTS_per56,
                                     player_TS, player_3PAr, player_FTr, player_ORB_P, player_DRB_P, 
                                     player_TRB_P, player_AST_P, player_STL_P, player_BLK_P, player_O_eFG, player_TO_P, 
                                     player_USG_P, result_epm, VORP_EPM))
