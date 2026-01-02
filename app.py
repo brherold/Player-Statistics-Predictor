@@ -84,8 +84,9 @@ def home():
                     )
                 else:
                     # Process team HTML
-                    header_text, team_id, season, team_stats, player_epms = get_team_player_stats(file_content)
+                    header_text, team_id, season, team_stats, player_stats = get_team_player_stats(file_content)
 
+                    #print(header_text, team_id, season, team_stats, player_epms)
                     
                     return render_template(
                         "teamStatPage.html",
@@ -93,7 +94,7 @@ def home():
                         team_id = team_id,
                         season = season, 
                         team_stats=team_stats,
-                        player_epms=player_epms,
+                        player_stats=player_stats,
                         epm_to_rgb=epm_to_rgb
                     )
             else:
@@ -125,5 +126,5 @@ thread.start()
 
 
 if __name__ == '__main__':
-    app.run()
-    #app.run(port=5002,debug=True)
+    #app.run()
+    app.run(port=5002,debug=True)
