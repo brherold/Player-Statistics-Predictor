@@ -230,71 +230,74 @@
             <th class="sortable" onclick="sortTable(2)">GS</th>
             <th class="sortable" onclick="sortTable(3)">GP</th>
             <th class="sortable" onclick="sortTable(4)">Min</th>
-            <th class="sortable" onclick="sortTable(5)" title="PTS per 56 Possessions">PTS / 56</th>
-            <th class="sortable" onclick="sortTable(6)"
+            <th class="sortable" onclick="sortTable(5)" title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">OPM</th>
+            <th class="sortable" onclick="sortTable(6)" title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">DPM</th>
+            <th class="sortable" onclick="sortTable(7)" title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">EPM</th>
+            <th class="sortable" onclick="sortTable(8)" title="Value Over Replacement Player: Cumulative version of EPM using Min and GP">VORP</th>
+
+            <th class="sortable" onclick="sortTable(9)" title="PTS per 56 Possessions">PTS / 56</th>
+            <th class="sortable" onclick="sortTable(10)"
                 title="True Shooting Percentage: A measure of shooting efficiency that accounts for field goals, three-point field goals, and free throws.">
                 TS%
             </th>
 
-            <th class="sortable" onclick="sortTable(7)"
+            <th class="sortable" onclick="sortTable(11)"
                 title="Three-Point Attempt Rate: The percentage of a player’s field goal attempts that come from three-point range.">
                 3PAr
             </th>
 
-            <th class="sortable" onclick="sortTable(8)"
+            <th class="sortable" onclick="sortTable(12)"
                 title="Free Throw Rate: The number of free throw attempts per field goal attempt.">
                 FTr
             </th>
 
-            <th class="sortable" onclick="sortTable(9)"
+            <th class="sortable" onclick="sortTable(13)"
                 title="Offensive Rebound Percentage: The percentage of available offensive rebounds a player grabs while on the floor.">
                 ORB%
             </th>
 
-            <th class="sortable" onclick="sortTable(10)"
+            <th class="sortable" onclick="sortTable(14)"
                 title="Defensive Rebound Percentage: The percentage of available defensive rebounds a player grabs while on the floor.">
                 DRB%
             </th>
 
-            <th class="sortable" onclick="sortTable(11)"
+            <th class="sortable" onclick="sortTable(15)"
                 title="Total Rebound Percentage: The percentage of available rebounds a player grabs while on the floor.">
                 TRB%
             </th>
 
-            <th class="sortable" onclick="sortTable(12)"
+            <th class="sortable" onclick="sortTable(16)"
                 title="Assist Percentage: The percentage of teammate field goals a player assisted while on the floor.">
                 AST%
             </th>
-
-            <th class="sortable" onclick="sortTable(13)"
-                title="Steal Percentage: The percentage of opponent possessions that end in a steal by the player while on the floor.">
-                STL%
-            </th>
-
-            <th class="sortable" onclick="sortTable(14)"
-                title="Block Percentage: The percentage of opponent two-point field goal attempts blocked by the player while on the floor.">
-                BLK%
-            </th>
-
-            <th class="sortable" onclick="sortTable(15)"
-                title="Opponent Effective Field Goal Percentage: The effective field goal percentage allowed by the player.">
-                OeFG%
-            </th>
-
-            <th class="sortable" onclick="sortTable(16)"
+          
+            <th class="sortable" onclick="sortTable(17)"
                 title="Turnover Percentage: The percentage of a player’s possessions that end in a turnover.">
                 TOV%
             </th>
 
-            <th class="sortable" onclick="sortTable(17)"
+            <th class="sortable" onclick="sortTable(18)"
+                title="Steal Percentage: The percentage of opponent possessions that end in a steal by the player while on the floor.">
+                STL%
+            </th>
+
+            <th class="sortable" onclick="sortTable(19)"
+                title="Block Percentage: The percentage of opponent two-point field goal attempts blocked by the player while on the floor.">
+                BLK%
+            </th>
+
+            <th class="sortable" onclick="sortTable(20)"
+                title="Opponent Effective Field Goal Percentage: The effective field goal percentage allowed by the player.">
+                OeFG%
+            </th>
+
+
+            <th class="sortable" onclick="sortTable(21)"
                 title="Usage Percentage: The percentage of team plays used by a player while on the floor.">
                 USG%
             </th>
 
-            <th class="sortable" onclick="sortTable(18)" title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">OPM</th>
-            <th class="sortable" onclick="sortTable(19)" title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">DPM</th>
-            <th class="sortable" onclick="sortTable(20)" title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">EPM</th>
-            <th class="sortable" onclick="sortTable(21)" title="Value Over Replacement Player: Cumulative version of EPM using Min and GP">VORP</th>
+
           </tr>
         </thead>
         <tbody>
@@ -305,23 +308,23 @@
             <td>{{ player[3] }}</td>
             <td>{{ player[4] }}</td>
             <td>{{ player[5] }}</td>
-            <td>{{ player[6] }}</td>
-            <td>{{ "%.3f"|format(player[7])|replace("0.", ".") }}</td>
-            <td>{{ "%.3f"|format(player[8])|replace("0.", ".") }}</td>
+            <td style="color: {{ epm_to_rgb(player[6][0], -3, 3) }}; font-weight:bold;">{{ player[6][0] }}</td>
+            <td style="color: {{ epm_to_rgb(player[6][1], -3, 3) }}; font-weight:bold;">{{ player[6][1] }}</td>
+            <td style="color: {{ epm_to_rgb(player[6][2], -7, 7) }}; font-weight:bold;">{{ player[6][2] }}</td>
+            <td style="color: {{ epm_to_rgb(player[7], -2, 8) }}; font-weight:bold;">{{ player[7] }}</td>
+            <td>{{ player[8] }}</td>
             <td>{{ "%.3f"|format(player[9])|replace("0.", ".") }}</td>
-            <td>{{ player[10] }}</td>
-            <td>{{ player[11] }}</td>
+            <td>{{ "%.3f"|format(player[10])|replace("0.", ".") }}</td>
+            <td>{{ "%.3f"|format(player[11])|replace("0.", ".") }}</td>
             <td>{{ player[12] }}</td>
             <td>{{ player[13] }}</td>
             <td>{{ player[14] }}</td>
             <td>{{ player[15] }}</td>
-            <td>{{ "%.3f"|format(player[16])|replace("0.", ".") }}</td>
+            <td>{{ player[16] }}</td>
             <td>{{ player[17] }}</td>
             <td>{{ player[18] }}</td>
-            <td style="color: {{ epm_to_rgb(player[19][0], -3, 3) }}; font-weight:bold;">{{ player[19][0] }}</td>
-            <td style="color: {{ epm_to_rgb(player[19][1], -3, 3) }}; font-weight:bold;">{{ player[19][1] }}</td>
-            <td style="color: {{ epm_to_rgb(player[19][2], -7, 7) }}; font-weight:bold;">{{ player[19][2] }}</td>
-            <td style="color: {{ epm_to_rgb(player[20], -2, 8) }}; font-weight:bold;">{{ player[20] }}</td>
+            <td>{{ "%.3f"|format(player[19])|replace("0.", ".") }}</td>
+            <td>{{ player[20] }}</td>
           </tr>
           {% endfor %}
         </tbody>

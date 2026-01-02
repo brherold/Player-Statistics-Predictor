@@ -281,10 +281,10 @@ def get_team_player_stats(team_stat_html):
         #VORP_for_EW = round((result[-1] + 3) * (player_Min / (team_Min * 5)) * (player_GP / team_GP),3)
         #EW = round(VORP_for_EW * .0484 * (team_GP),3)
         
-        player_stats_result.append((player_name, player_id, max_Position, player_GS, player_GP, player_Min, player_PTS_per56,
+        player_stats_result.append((player_name, player_id, max_Position, player_GS, player_GP, player_Min, result_epm, VORP_EPM, player_PTS_per56,
                                     player_TS, player_3PAr, player_FTr, player_ORB_P, player_DRB_P, 
-                                    player_TRB_P, player_AST_P, player_STL_P, player_BLK_P, player_O_eFG, player_TO_P, 
-                                    player_USG_P, result_epm, VORP_EPM))
+                                    player_TRB_P, player_AST_P, player_TO_P, player_STL_P, player_BLK_P, player_O_eFG, 
+                                    player_USG_P))
 
 
         
