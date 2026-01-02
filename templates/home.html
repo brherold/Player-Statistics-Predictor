@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hardwood Stats Predictor</title>
+  <title>Hardwood Stat Insights</title>
   <style>
     :root {
       --bg-dark: rgb(29, 30, 34);
@@ -181,56 +181,102 @@
   </style>
 </head>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hardwood Stat Insights</title>
+</head>
 <body>
   <div id="main">
     <div id="title">
-      <h1>Hardwood Player Stat Predictor</h1>
+      <h1>Hardwood Stat Insights</h1>
     </div>
 
     <form method="post" enctype="multipart/form-data">
-      <p class="position-label">Select Player Position</p>
-      <div class="radio-group">
-        <label><input type="radio" name="position" value="PG" checked /> PG</label>
-        <label><input type="radio" name="position" value="SG" /> SG</label>
-        <label><input type="radio" name="position" value="SF" /> SF</label>
-        <label><input type="radio" name="position" value="PF" /> PF</label>
-        <label><input type="radio" name="position" value="C" /> C</label>
+
+      <!-- MODE SELECTOR -->
+      <div class="radio-group" style="justify-content: center; gap: 20px; margin: 15px 0 10px 0;">
+        <label>
+          <input type="radio" name="mode" value="predict" checked onchange="updateMode()">
+          Player Stat Predictor
+        </label>
+        <label>
+          <input type="radio" name="mode" value="view" onchange="updateMode()">
+          Team Performance (EPM)
+        </label>
       </div>
 
-      <div class="form-group">
-        <label class="input-label">Enter Player URL</label>
-        <input type="url" name="url" placeholder="https://onlinecollegebasketball.org/player/223193" />
-        <!--
-        <span style="font-size: 0.75em; color: #888; display: block; margin-top: 4px;">
-          (Currently disabled – file upload is recommended)
-        </span>
-        -->
-
+      <!-- POSITION SECTION (shown only in predict mode) -->
+      <div id="position-section">
+        <p>Select Player Position</p>
+        <div class="radio-group">
+          <label><input type="radio" name="position" value="PG" checked /> PG</label>
+          <label><input type="radio" name="position" value="SG" /> SG</label>
+          <label><input type="radio" name="position" value="SF" /> SF</label>
+          <label><input type="radio" name="position" value="PF" /> PF</label>
+          <label><input type="radio" name="position" value="C" /> C</label>
+        </div>
       </div>
 
+      <!-- FILE UPLOAD -->
       <div class="form-group">
-        <p class="input-label">Or upload saved player HTML file</p>
+        <p id="file-upload-text">Upload the Saved Player HTML file</p>
         <div class="file-input-wrapper">
           <span class="file-input-label">Choose file...</span>
           <input type="file" name="htmlFile" accept=".html,.htm"
             onchange="this.previousElementSibling.textContent = this.files[0]?.name || 'Choose file...'" />
         </div>
-        <p class="file-instructions" style="font-size: 0.75em;">
+        <p>
           <strong>Instructions:</strong>
-          <ol style="margin: 5px 0 0 20px; padding: 0; list-style-type: decimal; font-size: 0.75em;">
-            <li>Go to the Player's Page you want to save.</li>
-            <li>Save the page by right-clicking and selecting ‘Save As…’ or pressing <strong>Ctrl + S</strong> (Cmd + S on Mac).</li>
-            <li>In the save dialog, select <strong>Save as type: Webpage, HTML only</strong>.</li>
+          <ol id="instructions-list">
+            <li>Go to the Player's page you want to save.</li>
+            <li>Save the page (Ctrl+S / Cmd+S) as "Webpage, HTML only".</li>
             <li>Upload the saved HTML file here.</li>
           </ol>
         </p>
-
       </div>
+
       <button type="submit">Submit</button>
     </form>
   </div>
+
+  <!-- JS for conditional content -->
+  <script>
+    function updateMode() {
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const positionSection = document.getElementById("position-section");
+      const fileUploadText = document.getElementById("file-upload-text");
+      const instructionsList = document.getElementById("instructions-list");
+
+      // Show/hide position section
+      positionSection.style.display = (mode === "predict") ? "block" : "none";
+
+      // Update file upload text and instructions based on mode
+      if (mode === "predict") {
+        fileUploadText.textContent = "Upload the Saved Player HTML file";
+        instructionsList.innerHTML = `
+          <li>Go to the Player's page you want to save.</li>
+          <li>Save the page (Ctrl+S / Cmd+S) as "Webpage, HTML only".</li>
+          <li>Upload the saved HTML file here.</li>
+        `;
+      } else {
+        fileUploadText.textContent = "Upload the Saved Team Stat HTML file";
+        instructionsList.innerHTML = `
+          <li>Go to the Team Statistic Page you want to save.</li>
+          <li>Save the page (Ctrl+S / Cmd+S) as "Webpage, HTML only".</li>
+          <li>Upload the saved HTML file here.</li>
+        `;
+      }
+    }
+
+    // Run once on page load
+    document.addEventListener("DOMContentLoaded", updateMode);
+  </script>
 </body>
 </html>
+
+
 
 
 <script>
