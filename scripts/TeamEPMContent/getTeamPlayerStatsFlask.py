@@ -17,6 +17,7 @@ def get_team_player_stats(team_stat_html):
     header_text = soup.find("h1").text #good enough to just show
 
     
+    
     #'''
     #Gets team_ID through scraping this page
     main_hrefs_arr = soup.find('div', id="Main").find_all("a", href=True)
@@ -120,14 +121,23 @@ def get_team_player_stats(team_stat_html):
 
     player_stats_result = []
     #####
+    
     for player in player_stats:
-        
+   
     #
     #player = table.find_all("tr")[7] #Trent Shaffer
 
         player_name = player.find_all("td")[0].text
+        
 
         player_id = player.find_all("td")[0].find("a")["href"].split("/")[-1]
+
+        #Checker
+        '''
+        if int(player_id) != 180696:
+            continue 
+        s
+        '''
 
         player_GP = int(player.find_all("td")[1].text)
 
@@ -163,7 +173,8 @@ def get_team_player_stats(team_stat_html):
         player_3P_A = float(player_3P_A / player_GP)
         player_3P_M =  float(player_3P_M / player_GP)
         
-
+        
+        
         player_FT_split = player.find_all("td")[12].get("title").split(" ")
 
         player_FT_M, player_FT_A = map(int,player_FT_split[-1].strip("()").split("-"))
@@ -184,7 +195,8 @@ def get_team_player_stats(team_stat_html):
         player_TO = float(player.find_all("td")[24].text)
         player_PF = float(player.find_all("td")[25].text)
         player_FD = float(player.find_all("td")[27].text)
-
+        
+        ###    
 
         player_opp_shots_split = player.find_all("td")[23].get("title").replace("\n"," ").split(" ")
 
@@ -192,19 +204,24 @@ def get_team_player_stats(team_stat_html):
         player_O_2P_M , _ = map(int,player_opp_shots_split[7].strip("()").split("-"))
         player_O_3P_M , _ = map(int,player_opp_shots_split[11].strip("()").split("-"))
 
+       
         player_O_FG_M = float(player_O_FG_M / player_GP)
         player_O_FG_A = float(player_O_FG_A / player_GP)
         player_O_2P_M =  float(player_O_2P_M / player_GP)
         player_O_3P_M =  float(player_O_3P_M / player_GP)
-
-        player_O_eFG = float((player_O_FG_M + .5 * player_O_3P_M) / player_O_FG_A)
+        
+        player_O_eFG = float((player_O_FG_M + .5 * player_O_3P_M) / player_O_FG_A) if player_O_FG_A != 0 else "-"
 
         player_O_PTS = float(player_O_2P_M * 2 + player_O_3P_M * 3)
 
-        player_Poss = float( team_Poss * player_Min/ team_Min)
-
         
-    
+
+        player_Poss = float( team_Poss * player_Min/ team_Min)
+        
+        
+        
+        
+
         player_off_values_epm = [player_FG_A, player_2P_M, player_3P_M, player_FT_M, player_Ast, player_TO, player_Off]
         player_def_values_epm = [player_O_FG_A, player_O_2P_M, player_O_3P_M, player_Stl, player_PF, player_Def]
         
@@ -288,6 +305,7 @@ def get_team_player_stats(team_stat_html):
 
 
         
+        
         #team_OEPM_plus_numerator += (result[0] * player_GP * player_Min)
 
         #team_DEPM_plus_numerator += (result[1] * player_GP * player_Min)
@@ -304,11 +322,11 @@ def get_team_player_stats(team_stat_html):
         key=lambda p: p[2] * p[3],  # gp * mins
         reverse=True
     )
-
-    #print(player_stats_result)
+    
+    
     
     #print(header_text, team_id, season,  team_stats, player_stats_result)
-
+    
     return header_text, team_id, season,  team_stats, player_stats_result
     #print(player_stats_result)
 

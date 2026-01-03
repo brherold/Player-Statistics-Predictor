@@ -323,7 +323,9 @@
             <td>{{ player[16] }}</td>
             <td>{{ player[17] }}</td>
             <td>{{ player[18] }}</td>
-            <td>{{ "%.3f"|format(player[19])|replace("0.", ".") }}</td>
+            <td>
+              {{ "-" if player[19] in ["-", None, ""] else "%.3f"|format(player[19]|float)|replace("0.", ".") }}
+            </td>
             <td>{{ player[20] }}</td>
           </tr>
           {% endfor %}
