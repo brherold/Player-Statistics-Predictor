@@ -241,19 +241,87 @@
       <table class="stats-table">
         <thead>
           <tr>
+            <th></th>
             <th>GP</th>
-            <th>Poss</th>
+            <th>Pace</th>
             <th title="Offensive Rating: Points Scored per 100 possessions">ORtg</th>
             <th title="Defensive Rating: Points Allowed per 100 possessions">DRtg</th>
             <th title="Net Rating: Point Differential per 100 possessions">NetRtg</th>
+            <th title="Effective Field Goal Percentage: Adjusted for 3-point shots">eFG%</th>
+            <th title="Points in the Paint Percentage: Share of total points scored in the paint">PITP%</th>
+            <th title="Two-Point Field Goal Percentage">2P%</th>
+            <th title="Three-Point Attempt Rate: Share of field goal attempts from three">3PAr</th>            
+            <th title="Three-Point Field Goal Percentage">3P%</th>
+            <th title="Free Throw Rate: Free throw attempts per field goal attempt">FTr</th>
+            <th title="Free Throw Percentage">FT%</th>
+            <th title="Offensive Rebound Percentage: Share of available offensive rebounds secured">ORB%</th>
+            <th title="Defensive Rebound Percentage: Share of available defensive rebounds secured">DRB%</th>
+            <th title="Turnover Percentage: Turnovers per 100 possessions">TO%</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            {% for value in team_stats %}
-              <td>{{ value }}</td>
-            {% endfor %}
+              <td><strong>Team</strong></td>
+              <td>{{ team_stats.GP }}</td>
+              <td>{{ team_stats.Pace }}</td>
+              <td>{{ team_stats.ORtg }}</td>
+              <td>{{ team_stats.DRtg }}</td>
+              <td>{{ team_stats.NETRtg }}</td>
+
+              <td>
+                {% if team_stats.eFG_P == "-" %}
+                  -
+                {% else %}
+                  {{ "%.3f"|format(team_stats.eFG_P)|replace("0.", ".") }}
+                {% endif %}
+              </td>
+
+              <td>{{ "%.3f"|format(team_stats.PITP_P)|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(team_stats["2P_P"])|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(team_stats["3P_P"])|replace("0.", ".") }}</td>
+
+              <td>{{ "%.3f"|format(team_stats["3PAr"])|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(team_stats.FTr)|replace("0.", ".") }}</td>
+
+              <td>{{ "%.3f"|format(team_stats.FT_P)|replace("0.", ".") }}</td>
+
+              <td>{{ "%.1f"|format(team_stats["ORB%"])|replace("0.", ".") }}</td>
+              <td>{{ "%.1f"|format(team_stats["DRB%"])|replace("0.", ".") }}</td>
+
+              <td>{{ "%.1f"|format(team_stats.TO_P)|replace("0.", ".") }}</td>
           </tr>
+        </tbody>
+        <tbody>
+            <tr>
+              <td><strong>Opponent</strong></td>
+              <td>{{ opp_stats.GP }}</td>
+              <td>{{ opp_stats.Pace }}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+
+              <td>
+                {% if opp_stats.eFG_P == "-" %}
+                  -
+                {% else %}
+                  {{ "%.3f"|format(opp_stats.eFG_P)|replace("0.", ".") }}
+                {% endif %}
+              </td>
+
+              <td>{{ "%.3f"|format(opp_stats.PITP_P)|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(opp_stats["2P_P"])|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(opp_stats["3P_P"])|replace("0.", ".") }}</td>
+
+              <td>{{ "%.3f"|format(opp_stats["3PAr"])|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(opp_stats.FTr)|replace("0.", ".") }}</td>
+
+              <td>{{ "%.3f"|format(opp_stats.FT_P)|replace("0.", ".") }}</td>
+
+              <td>{{ "%.1f"|format(opp_stats["ORB%"])|replace("0.", ".") }}</td>
+              <td>{{ "%.1f"|format(opp_stats["DRB%"])|replace("0.", ".") }}</td>
+
+              <td>{{ "%.1f"|format(opp_stats.TO_P)|replace("0.", ".") }}</td>
+            </tr>
         </tbody>
       </table>
     </div>

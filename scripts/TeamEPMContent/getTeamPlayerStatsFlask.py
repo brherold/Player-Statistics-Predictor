@@ -81,20 +81,31 @@ def get_team_player_stats(team_stat_html):
     team_GP = float(team[1].text)
 
     team_shots_split = team[6].get("title").replace("\n"," ").split(" ")
+    
 
     team_FG_M , team_FG_A = map(int,team_shots_split[3].strip("()").split("-"))
 
     team_FG_M = float(team_FG_M / team_GP)
     team_FG_A = float(team_FG_A / team_GP)
 
+    team_3P_M , team_3P_A = map(int,team_shots_split[11].strip("()").split("-"))
+
+    team_3P_M = float(team_3P_M / team_GP)
+    team_3P_A = float(team_3P_A / team_GP)
+
+    team_2P_M = team_FG_M - team_3P_M 
+    team_2P_A = team_FG_A - team_3P_A
     
     team_FT_split = team[12].get("title").split(" ")
 
-    _, team_FT_A = map(int,team_FT_split[-1].strip("()").split("-"))
+    team_FT_M, team_FT_A = map(int,team_FT_split[-1].strip("()").split("-"))
 
+    team_FT_M = float(team_FT_M / team_GP)
     team_FT_A = float(team_FT_A / team_GP)
 
     team_PTS = float(team[13].text)
+    team_PITP = float(team[15].text)
+    
     team_Off = float(team[17].text)
     team_Def = float(team[18].text)
     team_Rebs = team_Off + team_Def
@@ -114,6 +125,7 @@ def get_team_player_stats(team_stat_html):
     opponent = opponent_stats_thead.find_all("th")
 
     opp_PTS = float(opponent[13].text)
+    opp_PITP = float(opponent[15].text)
 
     opp_shots_split = opponent[6].get("title").replace("\n"," ").split(" ")
 
@@ -128,11 +140,15 @@ def get_team_player_stats(team_stat_html):
 
     opp_3P_M = float(opp_3P_M / team_GP)
     opp_3P_A = float(opp_3P_A / team_GP)
-    ####
+    
+    opp_2P_M = opp_FG_M - opp_3P_M 
+    opp_2P_A = opp_FG_A - opp_3P_A
+    
     opp_FT_split = opponent[12].get("title").split(" ")
 
-    _, opp_FT_A = map(int,opp_FT_split[-1].strip("()").split("-"))
+    opp_FT_M, opp_FT_A = map(int,opp_FT_split[-1].strip("()").split("-"))
 
+    opp_FT_M = float(opp_FT_M / team_GP)
     opp_FT_A = float(opp_FT_A / team_GP)
 
     opp_Off = float(opponent[17].text)
@@ -156,7 +172,67 @@ def get_team_player_stats(team_stat_html):
     team_DRtg = round(float(opp_PTS/opp_Poss) * 100,1)
 
 
-    team_stats = (team_GP, round(team_Poss,1), team_ORtg, team_DRtg, round(team_ORtg - team_DRtg,1))
+    #team_stats = (team_GP, round(team_Poss,1), team_ORtg, team_DRtg, round(team_ORtg - team_DRtg,1))
+
+    denom =  (team_Off + opp_Def)  
+    team_ORB_P = round(100 * (team_Off) / denom, 1) if denom != 0 else 0
+
+    denom = (team_Def + opp_Off)
+    team_DRB_P = round(100 * (team_Def) / denom, 1) if denom != 0 else 0
+
+    denom = (team_Rebs+ opp_Rebs)
+    team_TRB_P = round(100 * (team_Rebs) / denom, 1) if denom != 0 else 0
+
+    denom = team_FG_A + 0.44 * team_FT_A + team_TO
+    team_TO_P = round(100 * team_TO / denom, 1) if denom != 0 else 0
+
+    #Opp Advanced Stats
+    denom = opp_FG_A + 0.44 * opp_FT_A + opp_TO
+    opp_TO_P = round(100 * opp_TO / denom, 1) if denom != 0 else 0
+
+    ####
+    team_stats = {}
+    team_stats["GP"] = team_GP
+    team_stats["Pace"] = round(team_Poss,1)
+    team_stats["ORtg"] = team_ORtg
+    team_stats["DRtg"] = team_DRtg 
+    team_stats["NETRtg"] = round(team_ORtg - team_DRtg,1)
+    team_stats["eFG_P"] = float((team_FG_M + .5 * team_3P_M) / team_FG_A) if team_FG_A != 0 else "-"
+    team_stats["PITP_P"] = float(round(team_PITP / team_PTS,3))
+    team_stats["2P_P"] = float(round(team_2P_M / team_2P_A,3))
+    team_stats["3PAr"] = float(round(team_3P_A / team_FG_A,3))
+    team_stats["3P_P"] = float(round(team_3P_M / team_3P_A,3))
+    team_stats["FTr"] = float(round(team_FT_A / team_FG_A, 3))
+    team_stats["FT_P"] = float(round(team_FT_M / team_FT_A, 3))
+    team_stats["ORB%"] = team_ORB_P
+    team_stats["DRB%"] = team_DRB_P
+    team_stats["TO_P"] = team_TO_P
+
+
+    opp_stats = {}
+    opp_stats["GP"] = team_GP
+    opp_stats["Pace"] = round(opp_Poss,1)
+    opp_stats["ORtg"] = team_DRtg
+    opp_stats["DRtg"] = team_ORtg 
+    opp_stats["NETRtg"] = round(team_DRtg - team_ORtg,1)
+    opp_stats["eFG_P"] = float((opp_FG_M + .5 * opp_3P_M) / opp_FG_A) if opp_FG_A != 0 else "-"
+    opp_stats["PITP_P"] = float(round(opp_PITP / opp_PTS,3))
+    opp_stats["2P_P"] = float(round(opp_2P_M / opp_2P_A,3))
+    opp_stats["3PAr"] = float(round(opp_3P_A / opp_FG_A,3))
+    opp_stats["3P_P"] = float(round(opp_3P_M / opp_3P_A,3))
+    opp_stats["FTr"] = float(round(opp_FT_A / opp_FG_A, 3))
+    opp_stats["FT_P"] = float(round(opp_FT_M / opp_FT_A, 3))
+    opp_stats["ORB%"] = round(100 - team_DRB_P, 1)
+    opp_stats["DRB%"] = round(100 - team_ORB_P, 1)
+    opp_stats["TO_P"] = opp_TO_P    
+
+
+    
+    
+    
+
+
+
     player_stats = table.find_all("tr")[1:-4]
 
     player_stats_result = []
@@ -302,12 +378,11 @@ def get_team_player_stats(team_stat_html):
         VORP_EPM = round((result_epm[-1] + 3) * (player_Min / (team_Min)) * (player_GP / team_GP),1)
 
         #Advanced Statistics
-        player_TS = round((player_PTS) / (2 *(player_FG_A + .44 * player_FT_A)), 3) if (player_FG_A + .48 * player_FT_A) != 0 else 0 
+        player_TS = round((player_PTS) / (2 *(player_FG_A + .44 * player_FT_A)), 3) if (player_FG_A + .44 * player_FT_A) != 0 else 0 
         player_3PAr = round(player_3P_A / player_FG_A, 3) if player_FG_A != 0 else 0 
         player_FTr = round(player_FT_A / player_FG_A, 3) if player_FG_A != 0 else 0
 
         denom = player_Min * (team_Off + opp_Def)
-        
         player_ORB_P = round(100 * (player_Off * (team_Min)) / denom, 1) if denom != 0 else 0
 
         denom = player_Min * (team_Def + opp_Off)
@@ -380,7 +455,7 @@ def get_team_player_stats(team_stat_html):
     
     #print(header_text, team_id, season,  team_stats, player_stats_result)
     
-    return header_text, team_id, season,  team_stats, player_stats_result
+    return header_text, team_id, season,  team_stats, opp_stats,  player_stats_result
     #print(player_stats_result)
 
     return 

@@ -84,7 +84,7 @@ def home():
                     )
                 else:
                     # Process team HTML
-                    header_text, team_id, season, team_stats, player_stats = get_team_player_stats(file_content)
+                    header_text, team_id, season, team_stats, opp_stats, player_stats = get_team_player_stats(file_content)
 
                     #print(header_text, team_id, season, team_stats, player_epms)
                     
@@ -93,7 +93,8 @@ def home():
                         header_text = header_text,
                         team_id = team_id,
                         season = season, 
-                        team_stats=team_stats,
+                        team_stats= team_stats,
+                        opp_stats = opp_stats,
                         player_stats=player_stats,
                         epm_to_rgb=epm_to_rgb
                     )
