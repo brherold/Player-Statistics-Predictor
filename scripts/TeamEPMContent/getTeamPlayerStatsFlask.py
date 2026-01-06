@@ -6,13 +6,26 @@ from tabulate import tabulate
 from .StatDistributionGetter import *
 import numpy as np
 
-column_stats = ['Primary_Position','PTS', 'O_eFG_P','OEPM', 'DEPM', 'EPM', 'TS', 
+
+
+
+player_df = "DataCSVS/44-45-46-per56.csv"
+player_column_stats = ['Primary_Position','PTS', 'O_eFG_P','OEPM', 'DEPM', 'EPM', 'TS', 
          '_3PAr', 'FTr', 'ORB_P', 'DRB_P', 'TRB_P', 'AST_P', 'STL_P', 
          'BLK_P', 'TO_P', 'USG_P']
 
-distributions = build_stat_distributions(
-    csv_path="DataCSVS/44-45-46-per56.csv",
-    stats=column_stats
+player_distributions = build_stat_player_distributions(
+    csv_path= player_df,
+    stats=player_column_stats
+)
+##
+team_df = "DataCSVS/44-45-46-teamAvg.csv"
+team_column_stats = ['eFG_P', 'FT_P', '_2P_P', '_3P_P','Pace', '_3PAr','FTr', 'TO_P', 'ORB_P', 'DRB_P', 
+         'Pace', 'PITP%']
+
+team_distributions = build_stat_team_distributions(
+    csv_path= team_df,
+    stats=team_column_stats
 )
 
 def get_percentile(value, sorted_values):
@@ -186,50 +199,160 @@ def get_team_player_stats(team_stat_html):
     denom = team_FG_A + 0.44 * team_FT_A + team_TO
     team_TO_P = round(100 * team_TO / denom, 1) if denom != 0 else 0
 
+
+
     #Opp Advanced Stats
     denom = opp_FG_A + 0.44 * opp_FT_A + opp_TO
     opp_TO_P = round(100 * opp_TO / denom, 1) if denom != 0 else 0
 
+    '''
+    stats = ['eFG_P', 'FT_P', '_2P_P', '_3P_P','Pace', '_3PAr','FTr', 'TO_P', 'ORB_P', 'DRB_P', 
+         'Pace', 'PITP%']
+    '''
+    team_eFG_P = float((team_FG_M + .5 * team_3P_M) / team_FG_A) if team_FG_A != 0 else "-"
+    team_PITP_P = float(round(team_PITP / team_PTS,3))
+    team_2P_P = float(round(team_2P_M / team_2P_A,3))
+    team_3PAr = float(round(team_3P_A / team_FG_A,3))
+    team_3P_P = float(round(team_3P_M / team_3P_A,3))
+    team_FTr = float(round(team_FT_A / team_FG_A, 3))
+    team_FT_P = float(round(team_FT_M / team_FT_A, 3))
+
+    opp_eFG_P = float((opp_FG_M + .5 * opp_3P_M) / opp_FG_A) if opp_FG_A != 0 else "-"
+    opp_PITP_P = float(round(opp_PITP / opp_PTS,3))
+    opp_2P_P = float(round(opp_2P_M / opp_2P_A,3))
+    opp_3PAr = float(round(opp_3P_A / opp_FG_A,3))
+    opp_3P_P = float(round(opp_3P_M / opp_3P_A,3))
+    opp_FTr = float(round(opp_FT_A / opp_FG_A, 3))
+    opp_FT_P = float(round(opp_FT_M / opp_FT_A, 3))
+    opp_ORB_P = round(100 - team_DRB_P, 1)
+    opp_DRB_P = round(100 - team_ORB_P, 1)
+
     ####
     team_stats = {}
+    
     team_stats["GP"] = team_GP
-    team_stats["Pace"] = round(team_Poss,1)
+    
+    team_stats["Pace"] = {"value": team_Poss ,"percentile": get_percentile(team_Poss, team_distributions["Pace"]),"color": percentile_to_rgb(50)}
+    
     team_stats["ORtg"] = team_ORtg
     team_stats["DRtg"] = team_DRtg 
     team_stats["NETRtg"] = round(team_ORtg - team_DRtg,1)
-    team_stats["eFG_P"] = float((team_FG_M + .5 * team_3P_M) / team_FG_A) if team_FG_A != 0 else "-"
-    team_stats["PITP_P"] = float(round(team_PITP / team_PTS,3))
-    team_stats["2P_P"] = float(round(team_2P_M / team_2P_A,3))
-    team_stats["3PAr"] = float(round(team_3P_A / team_FG_A,3))
-    team_stats["3P_P"] = float(round(team_3P_M / team_3P_A,3))
-    team_stats["FTr"] = float(round(team_FT_A / team_FG_A, 3))
-    team_stats["FT_P"] = float(round(team_FT_M / team_FT_A, 3))
-    team_stats["ORB%"] = team_ORB_P
-    team_stats["DRB%"] = team_DRB_P
-    team_stats["TO_P"] = team_TO_P
-
+    team_stats["eFG_P"] =  {"value": team_eFG_P ,"percentile": get_percentile(team_eFG_P, team_distributions["eFG_P"]),"color": percentile_to_rgb(get_percentile(team_eFG_P, team_distributions["eFG_P"]))}
+    team_stats["PITP_P"] = {"value": team_PITP_P ,"percentile": get_percentile(team_PITP_P, team_distributions["PITP%"]),"color": percentile_to_rgb(get_percentile(team_PITP_P, team_distributions["PITP%"]))}
+    team_stats["Two_P"] = {"value": team_2P_P ,"percentile": get_percentile(team_2P_P, team_distributions["_2P_P"]),"color": percentile_to_rgb(get_percentile(team_2P_P, team_distributions["_2P_P"]))}
+    team_stats["ThreePAr"] = {"value": team_3PAr ,"percentile": get_percentile(team_3PAr, team_distributions["_3PAr"]),"color": percentile_to_rgb(get_percentile(team_3PAr, team_distributions["_3PAr"]))}
+    team_stats["Three_P"] = {"value": team_3P_P ,"percentile": get_percentile(team_3P_P, team_distributions["_3P_P"]),"color": percentile_to_rgb(get_percentile(team_3P_P, team_distributions["_3P_P"]))}
+    team_stats["FTr"] = {"value": team_FTr ,"percentile": get_percentile(team_FTr, team_distributions["FTr"]),"color": percentile_to_rgb(get_percentile(team_FTr, team_distributions["FTr"]))}
+    team_stats["FT_P"] = {"value": team_FT_P ,"percentile": get_percentile(team_FT_P, team_distributions["FT_P"]),"color": percentile_to_rgb(get_percentile(team_FT_P, team_distributions["FT_P"]))}
+    team_stats["ORB_P"] = {"value": team_ORB_P ,"percentile": get_percentile(team_ORB_P, team_distributions["ORB_P"]),"color": percentile_to_rgb(get_percentile(team_ORB_P, team_distributions["ORB_P"]))}
+    team_stats["DRB_P"] = {"value": team_DRB_P ,"percentile": get_percentile(team_DRB_P, team_distributions["DRB_P"]),"color": percentile_to_rgb(get_percentile(team_DRB_P, team_distributions["DRB_P"]))}
+    #Team TO_V inverted 
+    team_stats["TO_P"] = {"value": team_TO_P ,"percentile": lower_is_better(get_percentile(team_TO_P, team_distributions["TO_P"])),"color": percentile_to_rgb(lower_is_better(get_percentile(team_TO_P, team_distributions["TO_P"])))}
+    
 
     opp_stats = {}
+
     opp_stats["GP"] = team_GP
-    opp_stats["Pace"] = round(opp_Poss,1)
-    opp_stats["ORtg"] = team_DRtg
-    opp_stats["DRtg"] = team_ORtg 
-    opp_stats["NETRtg"] = round(team_DRtg - team_ORtg,1)
-    opp_stats["eFG_P"] = float((opp_FG_M + .5 * opp_3P_M) / opp_FG_A) if opp_FG_A != 0 else "-"
-    opp_stats["PITP_P"] = float(round(opp_PITP / opp_PTS,3))
-    opp_stats["2P_P"] = float(round(opp_2P_M / opp_2P_A,3))
-    opp_stats["3PAr"] = float(round(opp_3P_A / opp_FG_A,3))
-    opp_stats["3P_P"] = float(round(opp_3P_M / opp_3P_A,3))
-    opp_stats["FTr"] = float(round(opp_FT_A / opp_FG_A, 3))
-    opp_stats["FT_P"] = float(round(opp_FT_M / opp_FT_A, 3))
-    opp_stats["ORB%"] = round(100 - team_DRB_P, 1)
-    opp_stats["DRB%"] = round(100 - team_ORB_P, 1)
-    opp_stats["TO_P"] = opp_TO_P    
+
+    opp_stats["Pace"] = {"value": opp_Poss ,"percentile": get_percentile(opp_Poss, team_distributions["Pace"]),"color": percentile_to_rgb(50)}
+ 
+    
+    opp_stats["eFG_P"] = {
+        "value": opp_eFG_P,
+        "percentile": lower_is_better(get_percentile(opp_eFG_P, team_distributions["eFG_P"])),
+        "color": percentile_to_rgb(
+            lower_is_better(get_percentile(opp_eFG_P, team_distributions["eFG_P"]))
+        )
+    }
+
+    opp_stats["PITP_P"] = {
+        "value": opp_PITP_P,
+        "percentile": lower_is_better(get_percentile(opp_PITP_P, team_distributions["PITP%"])),
+        "color": percentile_to_rgb(50)
+    }
+
+    opp_stats["Two_P"] = {
+        "value": opp_2P_P,
+        "percentile": lower_is_better(get_percentile(opp_2P_P, team_distributions["_2P_P"])),
+        "color": percentile_to_rgb(
+            lower_is_better(get_percentile(opp_2P_P, team_distributions["_2P_P"]))
+        )
+    }
+
+    opp_stats["ThreePAr"] = {
+        "value": opp_3PAr,
+        "percentile": lower_is_better(get_percentile(opp_3PAr, team_distributions["_3PAr"])),
+        "color": percentile_to_rgb(
+            lower_is_better(get_percentile(opp_3PAr, team_distributions["_3PAr"]))
+        )
+    }
+
+    opp_stats["Three_P"] = {
+        "value": opp_3P_P,
+        "percentile": lower_is_better(get_percentile(opp_3P_P, team_distributions["_3P_P"])),
+        "color": percentile_to_rgb(
+            lower_is_better(get_percentile(opp_3P_P, team_distributions["_3P_P"]))
+        )
+    }
+
+    opp_stats["FTr"] = {
+        "value": opp_FTr,
+        "percentile": lower_is_better(get_percentile(opp_FTr, team_distributions["FTr"])),
+        "color": percentile_to_rgb(
+            lower_is_better(get_percentile(opp_FTr, team_distributions["FTr"]))
+        )
+    }
+
+    opp_stats["FT_P"] = {
+        "value": opp_FT_P,
+        "percentile": lower_is_better(get_percentile(opp_FT_P, team_distributions["FT_P"])),
+        "color": percentile_to_rgb(
+            lower_is_better(get_percentile(opp_FT_P, team_distributions["FT_P"]))
+        )
+    }
+
+    opp_stats["ORB_P"] = {
+        "value": opp_ORB_P,
+        "percentile": lower_is_better(get_percentile(opp_ORB_P, team_distributions["ORB_P"])),
+        "color": percentile_to_rgb(
+            lower_is_better(get_percentile(opp_ORB_P, team_distributions["ORB_P"]))
+        )
+    }
+
+    opp_stats["DRB_P"] = {
+        "value": opp_DRB_P,
+        "percentile": lower_is_better(get_percentile(opp_DRB_P, team_distributions["DRB_P"])),
+        "color": percentile_to_rgb(
+            lower_is_better(get_percentile(opp_DRB_P, team_distributions["DRB_P"]))
+        )
+    }
+
+    # Opponent TO% is inverted: higher is better for defense
+    opp_stats["TO_P"] = {
+        "value": opp_TO_P,
+        "percentile": get_percentile(opp_TO_P, team_distributions["TO_P"]),
+        "color": percentile_to_rgb(
+            get_percentile(opp_TO_P, team_distributions["TO_P"])
+        )
+    }
 
 
+
+    '''
+    opp_stats["eFG_P"] =  {"value": opp_eFG_P ,"percentile": get_percentile(opp_eFG_P, team_distributions["eFG_P"]),"color": percentile_to_rgb(get_percentile(opp_eFG_P, team_distributions["eFG_P"]))}
+    opp_stats["PITP_P"] = {"value": opp_PITP_P ,"percentile": get_percentile(opp_PITP_P, team_distributions["PITP%"]),"color": percentile_to_rgb(get_percentile(opp_PITP_P, team_distributions["PITP%"]))}
+    opp_stats["2P_P"] = {"value": opp_2P_P ,"percentile": get_percentile(opp_2P_P, team_distributions["_2P_P"]),"color": percentile_to_rgb(get_percentile(opp_2P_P, team_distributions["_2P_P"]))}
+    opp_stats["3PAr"] = {"value": opp_3PAr ,"percentile": get_percentile(opp_3PAr, team_distributions["_3PAr"]),"color": percentile_to_rgb(get_percentile(opp_3PAr, team_distributions["_3PAr"]))}
+    opp_stats["3P_P"] = {"value": opp_3P_P ,"percentile": get_percentile(opp_3P_P, team_distributions["_3P_P"]),"color": percentile_to_rgb(get_percentile(opp_3P_P, team_distributions["_3P_P"]))}
+    opp_stats["FTr"] = {"value": opp_FTr ,"percentile": get_percentile(opp_FTr, team_distributions["FTr"]),"color": percentile_to_rgb(get_percentile(opp_FTr, team_distributions["FTr"]))}
+    opp_stats["FT_P"] = {"value": opp_FT_P ,"percentile": get_percentile(opp_FT_P, team_distributions["FT_P"]),"color": percentile_to_rgb(get_percentile(opp_FT_P, team_distributions["FT_P"]))}
+    opp_stats["ORB%"] = {"value": opp_ORB_P ,"percentile": get_percentile(opp_ORB_P, team_distributions["ORB_P"]),"color": percentile_to_rgb(get_percentile(opp_ORB_P, team_distributions["ORB_P"]))}
+    opp_stats["DRB%"] = {"value": opp_DRB_P ,"percentile": get_percentile(opp_DRB_P, team_distributions["DRB_P"]),"color": percentile_to_rgb(get_percentile(opp_DRB_P, team_distributions["DRB_P"]))}
+    opp_stats["TO_P"] = {"value": opp_TO_P ,"percentile": get_percentile(opp_TO_P, team_distributions["TO_P"]),"color": percentile_to_rgb(get_percentile(opp_TO_P, team_distributions["TO_P"]))}
+    '''
     
     
-    
+    #print(opp_stats)
 
 
 
@@ -424,23 +547,23 @@ def get_team_player_stats(team_stat_html):
         player_dic["GS"] = player_GS
         player_dic["GP"] = player_GP
         player_dic["Min"] = player_Min
-        player_dic["OPM"] = {"value": player_OPM ,"percentile": get_percentile(player_OPM, distributions[(max_Position, "OEPM")]),"color": percentile_to_rgb(get_percentile(player_OPM, distributions[(max_Position, "OEPM")]))}
-        player_dic["DPM"] = {"value": player_DPM ,"percentile": get_percentile(player_DPM, distributions[(max_Position, "DEPM")]),"color": percentile_to_rgb(get_percentile(player_DPM, distributions[(max_Position, "DEPM")]))}
-        player_dic["EPM"] = {"value": player_EPM ,"percentile": get_percentile(player_EPM, distributions[(max_Position, "EPM")]),"color": percentile_to_rgb(get_percentile(player_EPM, distributions[(max_Position, "EPM")]))}
+        player_dic["OPM"] = {"value": player_OPM ,"percentile": get_percentile(player_OPM, player_distributions[(max_Position, "OEPM")]),"color": percentile_to_rgb(get_percentile(player_OPM, player_distributions[(max_Position, "OEPM")]))}
+        player_dic["DPM"] = {"value": player_DPM ,"percentile": get_percentile(player_DPM, player_distributions[(max_Position, "DEPM")]),"color": percentile_to_rgb(get_percentile(player_DPM, player_distributions[(max_Position, "DEPM")]))}
+        player_dic["EPM"] = {"value": player_EPM ,"percentile": get_percentile(player_EPM, player_distributions[(max_Position, "EPM")]),"color": percentile_to_rgb(get_percentile(player_EPM, player_distributions[(max_Position, "EPM")]))}
         player_dic["VORP"] = VORP_EPM
-        player_dic["PTS_per56"] = {"value": player_PTS_per56 ,"percentile": get_percentile(player_PTS_per56, distributions[(max_Position, "PTS")]),"color": percentile_to_rgb(get_percentile(player_PTS_per56, distributions[(max_Position, "PTS")]))}
-        player_dic["TS"] = {"value": player_TS ,"percentile": get_percentile(player_TS, distributions[(max_Position, "TS")]),"color": percentile_to_rgb(get_percentile(player_TS, distributions[(max_Position, "TS")]))}
-        player_dic["ThreePAr"] = {"value": player_3PAr ,"percentile": get_percentile(player_3PAr, distributions[(max_Position, "_3PAr")]),"color": percentile_to_rgb(get_percentile(player_3PAr, distributions[(max_Position, "_3PAr")]))}
-        player_dic["FTr"] = {"value": player_FTr ,"percentile": get_percentile(player_FTr, distributions[(max_Position, "FTr")]),"color": percentile_to_rgb(get_percentile(player_FTr, distributions[(max_Position, "FTr")]))}
-        player_dic["ORB_P"] = {"value": player_ORB_P ,"percentile": get_percentile(player_ORB_P, distributions[(max_Position, "ORB_P")]),"color": percentile_to_rgb(get_percentile(player_ORB_P, distributions[(max_Position, "ORB_P")]))}
-        player_dic["DRB_P"] = {"value": player_DRB_P ,"percentile": get_percentile(player_DRB_P, distributions[(max_Position, "DRB_P")]),"color": percentile_to_rgb(get_percentile(player_DRB_P, distributions[(max_Position, "DRB_P")]))}
-        player_dic["TRB_P"] = {"value": player_TRB_P ,"percentile": get_percentile(player_TRB_P, distributions[(max_Position, "TRB_P")]),"color": percentile_to_rgb(get_percentile(player_TRB_P, distributions[(max_Position, "TRB_P")]))}
-        player_dic["AST_P"] = {"value": player_AST_P ,"percentile": get_percentile(player_AST_P, distributions[(max_Position, "AST_P")]),"color": percentile_to_rgb(get_percentile(player_AST_P, distributions[(max_Position, "AST_P")]))}
-        player_dic["TO_P"] = {"value": player_TO_P ,"percentile": lower_is_better(get_percentile(player_TO_P, distributions[(max_Position, "TO_P")])),"color": percentile_to_rgb(lower_is_better(get_percentile(player_TO_P, distributions[(max_Position, "TO_P")])))}
-        player_dic["STL_P"] = {"value": player_STL_P ,"percentile": get_percentile(player_STL_P, distributions[(max_Position, "STL_P")]),"color": percentile_to_rgb(get_percentile(player_STL_P, distributions[(max_Position, "STL_P")]))}
-        player_dic["BLK_P"] = {"value": player_BLK_P ,"percentile": get_percentile(player_BLK_P, distributions[(max_Position, "BLK_P")]),"color": percentile_to_rgb(get_percentile(player_BLK_P, distributions[(max_Position, "BLK_P")]))}
-        player_dic["O_eFG_P"] = {"value": player_O_eFG ,"percentile": lower_is_better(get_percentile(player_O_eFG, distributions[(max_Position, "O_eFG_P")])),"color": percentile_to_rgb(lower_is_better(get_percentile(player_O_eFG, distributions[(max_Position, "O_eFG_P")])))}
-        player_dic["USG_P"] = {"value": player_USG_P ,"percentile": get_percentile(player_USG_P, distributions[(max_Position, "USG_P")]),"color": percentile_to_rgb(get_percentile(player_USG_P, distributions[(max_Position, "USG_P")]))}
+        player_dic["PTS_per56"] = {"value": player_PTS_per56 ,"percentile": get_percentile(player_PTS_per56, player_distributions[(max_Position, "PTS")]),"color": percentile_to_rgb(get_percentile(player_PTS_per56, player_distributions[(max_Position, "PTS")]))}
+        player_dic["TS"] = {"value": player_TS ,"percentile": get_percentile(player_TS, player_distributions[(max_Position, "TS")]),"color": percentile_to_rgb(get_percentile(player_TS, player_distributions[(max_Position, "TS")]))}
+        player_dic["ThreePAr"] = {"value": player_3PAr ,"percentile": get_percentile(player_3PAr, player_distributions[(max_Position, "_3PAr")]),"color": percentile_to_rgb(get_percentile(player_3PAr, player_distributions[(max_Position, "_3PAr")]))}
+        player_dic["FTr"] = {"value": player_FTr ,"percentile": get_percentile(player_FTr, player_distributions[(max_Position, "FTr")]),"color": percentile_to_rgb(get_percentile(player_FTr, player_distributions[(max_Position, "FTr")]))}
+        player_dic["ORB_P"] = {"value": player_ORB_P ,"percentile": get_percentile(player_ORB_P, player_distributions[(max_Position, "ORB_P")]),"color": percentile_to_rgb(get_percentile(player_ORB_P, player_distributions[(max_Position, "ORB_P")]))}
+        player_dic["DRB_P"] = {"value": player_DRB_P ,"percentile": get_percentile(player_DRB_P, player_distributions[(max_Position, "DRB_P")]),"color": percentile_to_rgb(get_percentile(player_DRB_P, player_distributions[(max_Position, "DRB_P")]))}
+        player_dic["TRB_P"] = {"value": player_TRB_P ,"percentile": get_percentile(player_TRB_P, player_distributions[(max_Position, "TRB_P")]),"color": percentile_to_rgb(get_percentile(player_TRB_P, player_distributions[(max_Position, "TRB_P")]))}
+        player_dic["AST_P"] = {"value": player_AST_P ,"percentile": get_percentile(player_AST_P, player_distributions[(max_Position, "AST_P")]),"color": percentile_to_rgb(get_percentile(player_AST_P, player_distributions[(max_Position, "AST_P")]))}
+        player_dic["TO_P"] = {"value": player_TO_P ,"percentile": lower_is_better(get_percentile(player_TO_P, player_distributions[(max_Position, "TO_P")])),"color": percentile_to_rgb(lower_is_better(get_percentile(player_TO_P, player_distributions[(max_Position, "TO_P")])))}
+        player_dic["STL_P"] = {"value": player_STL_P ,"percentile": get_percentile(player_STL_P, player_distributions[(max_Position, "STL_P")]),"color": percentile_to_rgb(get_percentile(player_STL_P, player_distributions[(max_Position, "STL_P")]))}
+        player_dic["BLK_P"] = {"value": player_BLK_P ,"percentile": get_percentile(player_BLK_P, player_distributions[(max_Position, "BLK_P")]),"color": percentile_to_rgb(get_percentile(player_BLK_P, player_distributions[(max_Position, "BLK_P")]))}
+        player_dic["O_eFG_P"] = {"value": player_O_eFG ,"percentile": lower_is_better(get_percentile(player_O_eFG, player_distributions[(max_Position, "O_eFG_P")])),"color": percentile_to_rgb(lower_is_better(get_percentile(player_O_eFG, player_distributions[(max_Position, "O_eFG_P")])))}
+        player_dic["USG_P"] = {"value": player_USG_P ,"percentile": get_percentile(player_USG_P, player_distributions[(max_Position, "USG_P")]),"color": percentile_to_rgb(get_percentile(player_USG_P, player_distributions[(max_Position, "USG_P")]))}
 
 
 

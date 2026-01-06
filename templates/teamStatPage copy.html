@@ -96,7 +96,6 @@
 
     th.highlighted-column {
       background-color: var(--column-highlight) !important;
-      background-color: var(--gray75);
     }
 
     tbody tr {
@@ -180,10 +179,43 @@
     }
 
     .percentile {
-    font-size: 0.75em;      
-    font-weight: bold;
-    color: rgba(255, 255, 255, 0.5); 
-      }
+      font-size: 0.75em;      
+      font-weight: bold;
+      color: rgba(255, 255, 255, 0.5); 
+    }
+
+
+    .gradient-bar-container {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 300px; 
+        z-index: 999;
+    }
+
+    .gradient-labels {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 4px;
+    }
+
+    .gradient-label-left,
+    .gradient-label-right {
+        font-size: 0.75em;
+        color: var(--fg-muted);
+    }
+
+    .gradient-bar {
+        width: 100%;
+        height: 10px;
+        border-radius: 5px;
+        background-image: linear-gradient(to right, rgb(255, 50, 50),  rgb(100, 100, 100), rgb(100, 100, 100), rgb(0, 255, 150)    );
+    }
+
   </style>
 </head>
 
@@ -209,19 +241,87 @@
       <table class="stats-table">
         <thead>
           <tr>
+            <th></th>
             <th>GP</th>
-            <th>Poss</th>
+            <th>Pace</th>
             <th title="Offensive Rating: Points Scored per 100 possessions">ORtg</th>
             <th title="Defensive Rating: Points Allowed per 100 possessions">DRtg</th>
             <th title="Net Rating: Point Differential per 100 possessions">NetRtg</th>
+            <th title="Effective Field Goal Percentage: Adjusted for 3-point shots">eFG%</th>
+            <th title="Points in the Paint Percentage: Share of total points scored in the paint">PITP%</th>
+            <th title="Two-Point Field Goal Percentage">2P%</th>
+            <th title="Three-Point Attempt Rate: Share of field goal attempts from three">3PAr</th>            
+            <th title="Three-Point Field Goal Percentage">3P%</th>
+            <th title="Free Throw Rate: Free throw attempts per field goal attempt">FTr</th>
+            <th title="Free Throw Percentage">FT%</th>
+            <th title="Offensive Rebound Percentage: Share of available offensive rebounds secured">ORB%</th>
+            <th title="Defensive Rebound Percentage: Share of available defensive rebounds secured">DRB%</th>
+            <th title="Turnover Percentage: Turnovers per 100 possessions">TO%</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            {% for value in team_stats %}
-              <td>{{ value }}</td>
-            {% endfor %}
+              <td><strong>Team</strong></td>
+              <td>{{ team_stats.GP }}</td>
+              <td>{{ "%.1f"|format(team_stats.Pace.value ) }}</td>
+              <td>{{ team_stats.ORtg }}</td>
+              <td>{{ team_stats.DRtg }}</td>
+              <td>{{ team_stats.NETRtg }}</td>
+
+              <td>
+                {% if team_stats.eFG_P.value  == "-" %}
+                  -
+                {% else %}
+                  {{ "%.3f"|format(team_stats.eFG_P.value )|replace("0.", ".") }}
+                {% endif %}
+              </td>
+
+              <td>{{ "%.3f"|format(team_stats.PITP_P.value )|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(team_stats["2P_P"].value )|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(team_stats["3P_P"].value )|replace("0.", ".") }}</td>
+
+              <td>{{ "%.3f"|format(team_stats["3PAr"].value )|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(team_stats.FTr.value )|replace("0.", ".") }}</td>
+
+              <td>{{ "%.3f"|format(team_stats.FT_P.value )|replace("0.", ".") }}</td>
+
+              <td>{{ "%.1f"|format(team_stats["ORB%"].value )|replace("0.", ".") }}</td>
+              <td>{{ "%.1f"|format(team_stats["DRB%"].value )|replace("0.", ".") }}</td>
+
+              <td>{{ "%.1f"|format(team_stats.TO_P.value )|replace("0.", ".") }}</td>
           </tr>
+        </tbody>
+        <tbody>
+            <tr>
+              <td><strong>Opponent</strong></td>
+              <td>{{ opp_stats.GP }}</td>
+              <td>{{ "%.1f"|format(opp_stats.Pace.value ) }}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+
+              <td>
+                {% if opp_stats.eFG_P.value == "-" %}
+                  -
+                {% else %}
+                  {{ "%.3f"|format(opp_stats.eFG_P.value)|replace("0.", ".") }}
+                {% endif %}
+              </td>
+
+              <td>{{ "%.3f"|format(opp_stats.PITP_P.value)|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(opp_stats["2P_P"].value)|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(opp_stats["3P_P"].value)|replace("0.", ".") }}</td>
+
+              <td>{{ "%.3f"|format(opp_stats["3PAr"].value)|replace("0.", ".") }}</td>
+              <td>{{ "%.3f"|format(opp_stats.FTr.value)|replace("0.", ".") }}</td>
+
+              <td>{{ "%.3f"|format(opp_stats.FT_P.value)|replace("0.", ".") }}</td>
+
+              <td>{{ "%.1f"|format(opp_stats["ORB%"].value)|replace("0.", ".") }}</td>
+              <td>{{ "%.1f"|format(opp_stats["DRB%"].value)|replace("0.", ".") }}</td>
+
+              <td>{{ "%.1f"|format(opp_stats.TO_P.value)|replace("0.", ".") }}</td>
+            </tr>
         </tbody>
       </table>
     </div>
@@ -389,8 +489,17 @@
       </table>
       
     </div>
-
+  
     <a href="{{ url_for('home') }}" class="home-button">Home</a>
+  </div>
+
+  <!-- Gradient bar  -->
+  <div class="gradient-bar-container">
+      <div class="gradient-labels">
+          <span class="gradient-label-left">Bad</span>
+          <span class="gradient-label-right">Good</span>
+      </div>
+      <div class="gradient-bar"></div>
   </div>
 
   <script>
