@@ -263,13 +263,21 @@
             <tr>
               <td><strong>Team</strong></td>
               <td>{{ team_stats["GP"] }}</td>
+
               <td>
                 {{ "%.1f"|format(team_stats["Pace"]["value"]) }}
                 <div class="percentile" style="color: {{ team_stats["Pace"]["color"] }};">{{ team_stats["Pace"]["percentile"] }}</div>
               </td>
-              <td>{{ team_stats["ORtg"] }}</td>
-              <td>{{ team_stats["DRtg"] }}</td>
-              <td>{{ team_stats["NETRtg"] }}</td>
+
+              <td>{{ team_stats["ORtg"]["value"] }}
+                <div class="percentile" style="color: {{ team_stats["ORtg"]["color"] }};">{{ team_stats["ORtg"]["percentile"] }}</div>
+              </td>
+              <td>{{ team_stats["DRtg"]["value"] }}
+                <div class="percentile" style="color: {{ team_stats["DRtg"]["color"] }};">{{ team_stats["DRtg"]["percentile"] }}</div>
+              </td>
+              <td>{{ team_stats["NETRtg"]["value"] }}
+                <div class="percentile" style="color: {{ team_stats["NETRtg"]["color"] }};">{{ team_stats["NETRtg"]["percentile"] }}</div>
+              </td>
 
               <td>
                 {% if team_stats["eFG_P"]["value"] == "-" %}

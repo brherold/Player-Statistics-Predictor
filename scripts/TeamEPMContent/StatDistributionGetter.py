@@ -93,7 +93,7 @@ print(df.columns.tolist())
 
 
 stats = ['eFG_P', 'FT_P', '_2P_P', '_3P_P','Pace', '_3PAr','FTr', 'TO_P', 'ORB_P', 'DRB_P', 
-         'Pace', 'PITP%']
+         'Pace', 'PITP%', 'ORtg', 'NetRtg']
 
 team_distributions = build_stat_team_distributions(
     csv_path="DataCSVS/44-45-46-teamAvg.csv",

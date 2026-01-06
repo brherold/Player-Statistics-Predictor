@@ -21,7 +21,7 @@ player_distributions = build_stat_player_distributions(
 ##
 team_df = "DataCSVS/44-45-46-teamAvg.csv"
 team_column_stats = ['eFG_P', 'FT_P', '_2P_P', '_3P_P','Pace', '_3PAr','FTr', 'TO_P', 'ORB_P', 'DRB_P', 
-         'Pace', 'PITP%']
+         'Pace', 'PITP%','ORtg', 'NetRtg']
 
 team_distributions = build_stat_team_distributions(
     csv_path= team_df,
@@ -207,7 +207,7 @@ def get_team_player_stats(team_stat_html):
 
     '''
     stats = ['eFG_P', 'FT_P', '_2P_P', '_3P_P','Pace', '_3PAr','FTr', 'TO_P', 'ORB_P', 'DRB_P', 
-         'Pace', 'PITP%']
+         'Pace', 'PITP%','ORtg', 'NetRtg']
     '''
     team_eFG_P = float((team_FG_M + .5 * team_3P_M) / team_FG_A) if team_FG_A != 0 else "-"
     team_PITP_P = float(round(team_PITP / team_PTS,3))
@@ -216,6 +216,8 @@ def get_team_player_stats(team_stat_html):
     team_3P_P = float(round(team_3P_M / team_3P_A,3))
     team_FTr = float(round(team_FT_A / team_FG_A, 3))
     team_FT_P = float(round(team_FT_M / team_FT_A, 3))
+
+    team_NetRtg = round(team_ORtg - team_DRtg,1)
 
     opp_eFG_P = float((opp_FG_M + .5 * opp_3P_M) / opp_FG_A) if opp_FG_A != 0 else "-"
     opp_PITP_P = float(round(opp_PITP / opp_PTS,3))
@@ -232,11 +234,12 @@ def get_team_player_stats(team_stat_html):
     
     team_stats["GP"] = team_GP
     
-    team_stats["Pace"] = {"value": team_Poss ,"percentile": get_percentile(team_Poss, team_distributions["Pace"]),"color": percentile_to_rgb(50)}
+    team_stats["Pace"] = {"value": team_Poss ,"percentile": get_percentile(team_Poss, team_distributions["Pace"]),"color": percentile_to_rgb(get_percentile(team_Poss, team_distributions["Pace"]))}
     
-    team_stats["ORtg"] = team_ORtg
-    team_stats["DRtg"] = team_DRtg 
-    team_stats["NETRtg"] = round(team_ORtg - team_DRtg,1)
+    team_stats["ORtg"] = {"value": team_ORtg ,"percentile": get_percentile(team_ORtg, team_distributions["ORtg"]),"color": percentile_to_rgb(get_percentile(team_ORtg, team_distributions["ORtg"]))}
+    team_stats["DRtg"] = {"value": team_DRtg ,"percentile": lower_is_better(get_percentile(team_DRtg, team_distributions["ORtg"])),"color": percentile_to_rgb(lower_is_better(get_percentile(team_DRtg, team_distributions["ORtg"])))}
+    team_stats["NETRtg"] = {"value": team_NetRtg ,"percentile": get_percentile(team_NetRtg, team_distributions["NetRtg"]),"color": percentile_to_rgb(get_percentile(team_NetRtg, team_distributions["NetRtg"]))}
+    
     team_stats["eFG_P"] =  {"value": team_eFG_P ,"percentile": get_percentile(team_eFG_P, team_distributions["eFG_P"]),"color": percentile_to_rgb(get_percentile(team_eFG_P, team_distributions["eFG_P"]))}
     team_stats["PITP_P"] = {"value": team_PITP_P ,"percentile": get_percentile(team_PITP_P, team_distributions["PITP%"]),"color": percentile_to_rgb(get_percentile(team_PITP_P, team_distributions["PITP%"]))}
     team_stats["Two_P"] = {"value": team_2P_P ,"percentile": get_percentile(team_2P_P, team_distributions["_2P_P"]),"color": percentile_to_rgb(get_percentile(team_2P_P, team_distributions["_2P_P"]))}
@@ -254,8 +257,8 @@ def get_team_player_stats(team_stat_html):
 
     opp_stats["GP"] = team_GP
 
-    opp_stats["Pace"] = {"value": opp_Poss ,"percentile": get_percentile(opp_Poss, team_distributions["Pace"]),"color": percentile_to_rgb(50)}
- 
+    opp_stats["Pace"] = {"value": opp_Poss ,"percentile": get_percentile(opp_Poss, team_distributions["Pace"]),"color": percentile_to_rgb(get_percentile(opp_Poss, team_distributions["Pace"]))}
+    
     
     opp_stats["eFG_P"] = {
         "value": opp_eFG_P,
