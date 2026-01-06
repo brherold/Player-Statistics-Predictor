@@ -170,6 +170,8 @@
       margin-top: 10px;
     }
 
+
+
     .player-table-wrapper::-webkit-scrollbar {
       width: 6px;
     }
@@ -259,70 +261,154 @@
             <th title="Turnover Percentage: Turnovers per 100 possessions">TO%</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
+          <tbody>
+            <tr>
               <td><strong>Team</strong></td>
-              <td>{{ team_stats.GP }}</td>
-              <td>{{ "%.1f"|format(team_stats.Pace.value ) }}</td>
-              <td>{{ team_stats.ORtg }}</td>
-              <td>{{ team_stats.DRtg }}</td>
-              <td>{{ team_stats.NETRtg }}</td>
+              <td>{{ team_stats["GP"] }}</td>
 
               <td>
-                {% if team_stats.eFG_P.value  == "-" %}
+                {{ "%.1f"|format(team_stats["Pace"]["value"]) }}
+                <div class="percentile" style="color: {{ team_stats["Pace"]["color"] }};">{{ team_stats["Pace"]["percentile"] }}</div>
+              </td>
+
+              <td>{{ team_stats["ORtg"]["value"] }}
+                <div class="percentile" style="color: {{ team_stats["ORtg"]["color"] }};">{{ team_stats["ORtg"]["percentile"] }}</div>
+              </td>
+              <td>{{ team_stats["DRtg"]["value"] }}
+                <div class="percentile" style="color: {{ team_stats["DRtg"]["color"] }};">{{ team_stats["DRtg"]["percentile"] }}</div>
+              </td>
+              <td>{{ team_stats["NETRtg"]["value"] }}
+                <div class="percentile" style="color: {{ team_stats["NETRtg"]["color"] }};">{{ team_stats["NETRtg"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {% if team_stats["eFG_P"]["value"] == "-" %}
                   -
                 {% else %}
-                  {{ "%.3f"|format(team_stats.eFG_P.value )|replace("0.", ".") }}
+                  {{ "%.3f"|format(team_stats["eFG_P"]["value"])|replace("0.", ".") }}
+                  <div class="percentile" style="color: {{ team_stats["eFG_P"]["color"] }};">{{ team_stats["eFG_P"]["percentile"] }}</div>
                 {% endif %}
               </td>
 
-              <td>{{ "%.3f"|format(team_stats.PITP_P.value )|replace("0.", ".") }}</td>
-              <td>{{ "%.3f"|format(team_stats["2P_P"].value )|replace("0.", ".") }}</td>
-              <td>{{ "%.3f"|format(team_stats["3P_P"].value )|replace("0.", ".") }}</td>
+              <td>
+                {{ "%.3f"|format(team_stats["PITP_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["PITP_P"]["color"] }};">{{ team_stats["PITP_P"]["percentile"] }}</div>
+              </td>
 
-              <td>{{ "%.3f"|format(team_stats["3PAr"].value )|replace("0.", ".") }}</td>
-              <td>{{ "%.3f"|format(team_stats.FTr.value )|replace("0.", ".") }}</td>
+              <td>
+                {{ "%.3f"|format(team_stats["Two_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["Two_P"]["color"] }};">{{ team_stats["Two_P"]["percentile"] }}</div>
+              </td>
 
-              <td>{{ "%.3f"|format(team_stats.FT_P.value )|replace("0.", ".") }}</td>
+              <td>
+                {{ "%.3f"|format(team_stats["ThreePAr"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["ThreePAr"]["color"] }};">{{ team_stats["ThreePAr"]["percentile"] }}</div>
+              </td>
 
-              <td>{{ "%.1f"|format(team_stats["ORB%"].value )|replace("0.", ".") }}</td>
-              <td>{{ "%.1f"|format(team_stats["DRB%"].value )|replace("0.", ".") }}</td>
+              <td>
+                {{ "%.3f"|format(team_stats["Three_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["Three_P"]["color"] }};">{{ team_stats["Three_P"]["percentile"] }}</div>
+              </td>
 
-              <td>{{ "%.1f"|format(team_stats.TO_P.value )|replace("0.", ".") }}</td>
-          </tr>
-        </tbody>
-        <tbody>
+
+
+              <td>
+                {{ "%.3f"|format(team_stats["FTr"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["FTr"]["color"] }};">{{ team_stats["FTr"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(team_stats["FT_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["FT_P"]["color"] }};">{{ team_stats["FT_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(team_stats["ORB_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["ORB_P"]["color"] }};">{{ team_stats["ORB_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(team_stats["DRB_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["DRB_P"]["color"] }};">{{ team_stats["DRB_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(team_stats["TO_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["TO_P"]["color"] }};">{{ team_stats["TO_P"]["percentile"] }}</div>
+              </td>
+            </tr>
+          </tbody>
+
+          <tbody>
             <tr>
               <td><strong>Opponent</strong></td>
-              <td>{{ opp_stats.GP }}</td>
-              <td>{{ "%.1f"|format(opp_stats.Pace.value ) }}</td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td>{{ opp_stats["GP"] }}</td>
+              <td>
+                {{ "%.1f"|format(opp_stats["Pace"]["value"]) }}
+                <div class="percentile" style="color: {{ opp_stats["Pace"]["color"] }};">{{ opp_stats["Pace"]["percentile"] }}</div>
+              </td>
+              <td>{{ opp_stats["ORtg"] }}</td>
+              <td>{{ opp_stats["DRtg"] }}</td>
+              <td>{{ opp_stats["NETRtg"] }}</td>
 
               <td>
-                {% if opp_stats.eFG_P.value == "-" %}
+                {% if opp_stats["eFG_P"]["value"] == "-" %}
                   -
                 {% else %}
-                  {{ "%.3f"|format(opp_stats.eFG_P.value)|replace("0.", ".") }}
+                  {{ "%.3f"|format(opp_stats["eFG_P"]["value"])|replace("0.", ".") }}
+                  <div class="percentile" style="color: {{ opp_stats["eFG_P"]["color"] }};">{{ opp_stats["eFG_P"]["percentile"] }}</div>
                 {% endif %}
               </td>
 
-              <td>{{ "%.3f"|format(opp_stats.PITP_P.value)|replace("0.", ".") }}</td>
-              <td>{{ "%.3f"|format(opp_stats["2P_P"].value)|replace("0.", ".") }}</td>
-              <td>{{ "%.3f"|format(opp_stats["3P_P"].value)|replace("0.", ".") }}</td>
+              <td>
+                {{ "%.3f"|format(opp_stats["PITP_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["PITP_P"]["color"] }};">{{ opp_stats["PITP_P"]["percentile"] }}</div>
+              </td>
 
-              <td>{{ "%.3f"|format(opp_stats["3PAr"].value)|replace("0.", ".") }}</td>
-              <td>{{ "%.3f"|format(opp_stats.FTr.value)|replace("0.", ".") }}</td>
+              <td>
+                {{ "%.3f"|format(opp_stats["Two_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["Two_P"]["color"] }};">{{ opp_stats["Two_P"]["percentile"] }}</div>
+              </td>
 
-              <td>{{ "%.3f"|format(opp_stats.FT_P.value)|replace("0.", ".") }}</td>
+              <td>
+                {{ "%.3f"|format(opp_stats["ThreePAr"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["ThreePAr"]["color"] }};">{{ opp_stats["ThreePAr"]["percentile"] }}</div>
+              </td>
 
-              <td>{{ "%.1f"|format(opp_stats["ORB%"].value)|replace("0.", ".") }}</td>
-              <td>{{ "%.1f"|format(opp_stats["DRB%"].value)|replace("0.", ".") }}</td>
+              <td>
+                {{ "%.3f"|format(opp_stats["Three_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["Three_P"]["color"] }};">{{ opp_stats["Three_P"]["percentile"] }}</div>
+              </td>
 
-              <td>{{ "%.1f"|format(opp_stats.TO_P.value)|replace("0.", ".") }}</td>
+
+              <td>
+                {{ "%.3f"|format(opp_stats["FTr"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["FTr"]["color"] }};">{{ opp_stats["FTr"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(opp_stats["FT_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["FT_P"]["color"] }};">{{ opp_stats["FT_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(opp_stats["ORB_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["ORB_P"]["color"] }};">{{ opp_stats["ORB_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(opp_stats["DRB_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["DRB_P"]["color"] }};">{{ opp_stats["DRB_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(opp_stats["TO_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["TO_P"]["color"] }};">{{ opp_stats["TO_P"]["percentile"] }}</div>
+              </td>
             </tr>
-        </tbody>
+          </tbody>
+
+
       </table>
     </div>
 

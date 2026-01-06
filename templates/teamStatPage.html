@@ -165,10 +165,19 @@
     .home-button:hover { background-color: #0056b3; }
 
     .player-table-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      margin-top: 10px;
+        flex: unset;
+        max-height: calc(100vh - 200px); 
+        overflow-y: auto;
     }
+
+    .player-table-wrapper thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background-color: var(--bg-medium);
+    }
+
+
 
     .player-table-wrapper::-webkit-scrollbar {
       width: 6px;
@@ -216,6 +225,26 @@
         background-image: linear-gradient(to right, rgb(255, 50, 50),  rgb(100, 100, 100), rgb(100, 100, 100), rgb(0, 255, 150)    );
     }
 
+    .team-table-wrapper {
+        width: 100%;
+        display: block;          
+        overflow-x: auto;     
+        overflow-y: visible;    
+        min-height: 180px;        
+        margin-bottom: 0px;    
+    }
+
+
+    .team-table-wrapper table {
+        width: 100%;
+        min-width: 900px;          
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        table-layout: auto;        
+    }
+
+
+
   </style>
 </head>
 
@@ -237,7 +266,7 @@
     <h1><a href="https://onlinecollegebasketball.org/statistics/{{ team_id }}/{{ season }}/{{ suffix }}" target="_blank">{{header_text}}</a></h1>
 
     <!-- TEAM STATS -->
-    <div class="table-container">
+    <div class="table-container team-table-wrapper">
       <table class="stats-table">
         <thead>
           <tr>
