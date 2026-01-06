@@ -20,7 +20,7 @@ def build_stat_player_distributions(
     df = df[
         (df["Primary_Position"].isin(positions))
     ]
-
+    
     distributions = defaultdict(list)
 
     for pos in positions:
@@ -30,11 +30,32 @@ def build_stat_player_distributions(
             if stat not in pos_df.columns:
                 continue
 
-            values = pos_df[stat].dropna().tolist()
 
-            if values:
-                values.sort()
-                distributions[(pos, stat)] = values
+            if stat == "_3P_P":
+                df_3P_A = df[df["_3P_A"] >= 3]
+                
+                _3P_values = df_3P_A[stat].dropna().tolist()
+
+                if _3P_values:
+                    _3P_values.sort()
+                    distributions[stat] = _3P_values
+            
+            elif stat == "FT_P":
+                df_FT_A = df[df["FT_A"] >= 3]
+                
+                FT_values = df_FT_A[stat].dropna().tolist()
+
+                if FT_values:
+                    FT_values.sort()
+                    distributions[stat] = FT_values
+
+            else:
+
+                values = pos_df[stat].dropna().tolist()
+
+                if values:
+                    values.sort()
+                    distributions[(pos, stat)] = values
 
     return distributions
 '''
@@ -44,7 +65,7 @@ df = pd.read_csv("DataCSVS/44-45-46-per56.csv")
 
 stats = ['Primary_Position','PTS', 'O_eFG_P','OEPM', 'DEPM', 'EPM', 'TS', 
          '_3PAr', 'FTr', 'ORB_P', 'DRB_P', 'TRB_P', 'AST_P', 'STL_P', 
-         'BLK_P', 'TO_P', 'USG_P']
+         'BLK_P', 'TO_P', 'USG_P','_2P_P', '_3P_P', 'FT_P']
 
 player_distributions = build_stat_player_distributions(
     csv_path="DataCSVS/44-45-46-per56.csv",
@@ -52,6 +73,8 @@ player_distributions = build_stat_player_distributions(
 )
 
 #print(player_distributions[("PG", "AST_P")])
+#print(player_distributions['_3P_P'])
+#print(player_distributions['FT_P'])
 '''
 
 

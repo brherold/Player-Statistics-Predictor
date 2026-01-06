@@ -461,54 +461,71 @@
             </th>
 
             <th class="sortable" onclick="sortTable(11)"
+                title="Two-Point Field Goal Percentage">
+                2P%
+            </th>            
+
+            <th class="sortable" onclick="sortTable(12)"
                 title="Three-Point Attempt Rate: The percentage of a player’s field goal attempts that come from three-point range.">
                 3PAr
             </th>
-            <th class="sortable" onclick="sortTable(12)"
+
+            <th class="sortable" onclick="sortTable(13)"
+                title="Three-Point Field Goal Percentage">
+                3P%
+            </th>
+
+            <th class="sortable" onclick="sortTable(14)"
                 title="Free Throw Rate: The number of free throw attempts per field goal attempt.">
                 FTr
             </th>
-            <th class="sortable" onclick="sortTable(13)"
+
+            <th class="sortable" onclick="sortTable(15)"
+                title="Free Throw Percentage">
+                FT%
+            </th>
+
+            <th class="sortable" onclick="sortTable(16)"
                 title="Offensive Rebound Percentage: The percentage of available offensive rebounds a player grabs while on the floor.">
                 ORB%
             </th>
 
-            <th class="sortable" onclick="sortTable(14)"
+            <th class="sortable" onclick="sortTable(17)"
                 title="Defensive Rebound Percentage: The percentage of available defensive rebounds a player grabs while on the floor.">
                 DRB%
             </th>
 
-            <th class="sortable" onclick="sortTable(15)"
+            <th class="sortable" onclick="sortTable(18)"
                 title="Total Rebound Percentage: The percentage of available rebounds a player grabs while on the floor.">
                 TRB%
             </th>            
 
-            <th class="sortable" onclick="sortTable(16)"
+            <th class="sortable" onclick="sortTable(19)"
                 title="Assist Percentage: The percentage of teammate field goals a player assisted while on the floor.">
                 AST%
             </th>
           
-            <th class="sortable" onclick="sortTable(17)"
+            <th class="sortable" onclick="sortTable(20)"
                 title="Turnover Percentage: The percentage of a player’s possessions that end in a turnover.">
                 TOV%
             </th>
 
-            <th class="sortable" onclick="sortTable(18)"
+            <th class="sortable" onclick="sortTable(21)"
                 title="Steal Percentage: The percentage of opponent possessions that end in a steal by the player while on the floor.">
                 STL%
             </th>
 
-            <th class="sortable" onclick="sortTable(19)"
+            <th class="sortable" onclick="sortTable(22)"
                 title="Block Percentage: The percentage of opponent two-point field goal attempts blocked by the player while on the floor.">
                 BLK%
             </th>  
 
-            <th class="sortable" onclick="sortTable(20)"
+            <th class="sortable" onclick="sortTable(23)"
                 title="Opponent Effective Field Goal Percentage: The effective field goal percentage allowed by the player.">
                 OeFG%
             </th>
 
-            <th class="sortable" onclick="sortTable(21)"
+            <th class="sortable" onclick="sortTable(24)"
                 title="Usage Percentage: The percentage of team plays used by a player while on the floor.">
                 USG%
             </th>
@@ -545,16 +562,33 @@
                 <div class="percentile" style="color: {{ player.PTS_per56.color }};">{{ player.PTS_per56.percentile }}</div>
               </td>
               <td>
-                <div>{{ "%.3f"|format(player.TS.value)|replace("0.", ".") }}</div>
+                <div>{{ "-" if player.TS.value in ["-", None, ""] else "%.3f"|format(player.TS.value|float)|replace("0.", ".") }}</div>
                 <div class="percentile" style="color: {{ player.TS.color }};">{{ player.TS.percentile }}</div>
               </td>
+              
+              <td>
+                <div>{{ "-" if player.Two_P.value in ["-", None, ""] else "%.3f"|format(player.Two_P.value|float)|replace("0.", ".") }}</div>
+                <div class="percentile" style="color: {{ player.Two_P.color }};">{{ player.Two_P.percentile }}</div>
+              </td>
+              
               <td>
                 <div>{{ "%.3f"|format(player.ThreePAr.value)|replace("0.", ".") }}</div>
                 <div class="percentile" style="color: {{ player.ThreePAr.color }};">{{ player.ThreePAr.percentile }}</div>
               </td>
+              
+              <td>
+                <div>{{ "-" if player.Three_P.value in ["-", None, ""] else "%.3f"|format(player.Three_P.value|float)|replace("0.", ".") }}</div>
+                <div class="percentile" style="color: {{ player.Three_P.color }};">{{ player.Three_P.percentile }}</div>
+              </td>
+
               <td>
                 <div>{{ "%.3f"|format(player.FTr.value)|replace("0.", ".") }}</div>
                 <div class="percentile" style="color: {{ player.FTr.color }};">{{ player.FTr.percentile }}</div>
+              </td>
+          
+              <td>
+                <div>{{ "-" if player.FT_P.value in ["-", None, ""] else "%.3f"|format(player.FT_P.value|float)|replace("0.", ".") }}</div>
+                <div class="percentile" style="color: {{ player.FT_P.color }};">{{ player.FT_P.percentile }}</div>
               </td>
 
               <td>

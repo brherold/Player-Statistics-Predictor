@@ -12,7 +12,7 @@ import numpy as np
 player_df = "DataCSVS/44-45-46-per56.csv"
 player_column_stats = ['Primary_Position','PTS', 'O_eFG_P','OEPM', 'DEPM', 'EPM', 'TS', 
          '_3PAr', 'FTr', 'ORB_P', 'DRB_P', 'TRB_P', 'AST_P', 'STL_P', 
-         'BLK_P', 'TO_P', 'USG_P']
+         'BLK_P', 'TO_P', 'USG_P', '_2P_P', '_3P_P', 'FT_P']
 
 player_distributions = build_stat_player_distributions(
     csv_path= player_df,
@@ -406,16 +406,23 @@ def get_team_player_stats(team_stat_html):
         player_shots_split = player.find_all("td")[6].get("title").replace("\n"," ").split(" ")
 
         player_FG_M , player_FG_A = map(int,player_shots_split[3].strip("()").split("-"))
-        player_2P_M , _ = map(int,player_shots_split[7].strip("()").split("-"))
+        player_2P_M , player_2P_A = map(int,player_shots_split[7].strip("()").split("-"))
         player_3P_M , player_3P_A = map(int,player_shots_split[11].strip("()").split("-"))
+
+        
 
         player_FG_M = float(player_FG_M / player_GP)
         player_FG_A = float(player_FG_A / player_GP)
         player_2P_M =  float(player_2P_M / player_GP)
+        player_2P_A =  float(player_2P_A / player_GP)
         player_3P_A = float(player_3P_A / player_GP)
         player_3P_M =  float(player_3P_M / player_GP)
+
         
+        player_2P_P = float(round(player_2P_M / player_2P_A,3)) if player_2P_A != 0 else "-"
         
+        player_3P_P = float(round(player_3P_M / player_3P_A,3)) if player_3P_A != 0 else "-"
+
         
         player_FT_split = player.find_all("td")[12].get("title").split(" ")
 
@@ -424,6 +431,8 @@ def get_team_player_stats(team_stat_html):
         player_FT_M = float(player_FT_M / player_GP)
 
         player_FT_A = float(player_FT_A/ player_GP)
+
+        player_FT_P = round(player_FT_M / player_FT_A, 3) if player_FT_A != 0 else "-"
 
         player_PTS = float(player.find_all("td")[13].text)
         #ORB
@@ -504,7 +513,7 @@ def get_team_player_stats(team_stat_html):
         VORP_EPM = round((result_epm[-1] + 3) * (player_Min / (team_Min)) * (player_GP / team_GP),1)
 
         #Advanced Statistics
-        player_TS = round((player_PTS) / (2 *(player_FG_A + .44 * player_FT_A)), 3) if (player_FG_A + .44 * player_FT_A) != 0 else 0 
+        player_TS = round((player_PTS) / (2 *(player_FG_A + .44 * player_FT_A)), 3) if (player_FG_A + .44 * player_FT_A) != 0 else " - "
         player_3PAr = round(player_3P_A / player_FG_A, 3) if player_FG_A != 0 else 0 
         player_FTr = round(player_FT_A / player_FG_A, 3) if player_FG_A != 0 else 0
 
@@ -556,8 +565,14 @@ def get_team_player_stats(team_stat_html):
         player_dic["VORP"] = VORP_EPM
         player_dic["PTS_per56"] = {"value": player_PTS_per56 ,"percentile": get_percentile(player_PTS_per56, player_distributions[(max_Position, "PTS")]),"color": percentile_to_rgb(get_percentile(player_PTS_per56, player_distributions[(max_Position, "PTS")]))}
         player_dic["TS"] = {"value": player_TS ,"percentile": get_percentile(player_TS, player_distributions[(max_Position, "TS")]),"color": percentile_to_rgb(get_percentile(player_TS, player_distributions[(max_Position, "TS")]))}
+        
+        player_dic["Two_P"] = {"value": player_2P_P ,"percentile": get_percentile(player_2P_P, player_distributions[(max_Position, "_2P_P")]),"color": percentile_to_rgb(get_percentile(player_2P_P, player_distributions[(max_Position, "_2P_P")]))}
         player_dic["ThreePAr"] = {"value": player_3PAr ,"percentile": get_percentile(player_3PAr, player_distributions[(max_Position, "_3PAr")]),"color": percentile_to_rgb(get_percentile(player_3PAr, player_distributions[(max_Position, "_3PAr")]))}
+        player_dic["Three_P"] = {"value": player_3P_P ,"percentile": get_percentile(player_3P_P, player_distributions['_3P_P']),"color": percentile_to_rgb(get_percentile(player_3P_P, player_distributions["_3P_P"]))}
+       
         player_dic["FTr"] = {"value": player_FTr ,"percentile": get_percentile(player_FTr, player_distributions[(max_Position, "FTr")]),"color": percentile_to_rgb(get_percentile(player_FTr, player_distributions[(max_Position, "FTr")]))}
+        player_dic["FT_P"] = {"value": player_FT_P ,"percentile": get_percentile(player_FT_P, player_distributions["FT_P"]),"color": percentile_to_rgb(get_percentile(player_FT_P, player_distributions["FT_P"]))}
+        
         player_dic["ORB_P"] = {"value": player_ORB_P ,"percentile": get_percentile(player_ORB_P, player_distributions[(max_Position, "ORB_P")]),"color": percentile_to_rgb(get_percentile(player_ORB_P, player_distributions[(max_Position, "ORB_P")]))}
         player_dic["DRB_P"] = {"value": player_DRB_P ,"percentile": get_percentile(player_DRB_P, player_distributions[(max_Position, "DRB_P")]),"color": percentile_to_rgb(get_percentile(player_DRB_P, player_distributions[(max_Position, "DRB_P")]))}
         player_dic["TRB_P"] = {"value": player_TRB_P ,"percentile": get_percentile(player_TRB_P, player_distributions[(max_Position, "TRB_P")]),"color": percentile_to_rgb(get_percentile(player_TRB_P, player_distributions[(max_Position, "TRB_P")]))}
