@@ -4,8 +4,11 @@ from flask_cors import CORS
 from scripts.CustomGetPredictedStats import *
 from scripts.pygetPlayerSkills import *
 from scripts.WeightInputRecruitMeasureable import *
-from RecruitSkillPredictorCol.scripts.getPred_3 import *
+#from RecruitSkillPredictorCol.scripts.getPred_4 import *
+from RecruitSkillPredictorCol.scripts.getPred_New_Def import *
 import json
+
+
 
 app = Flask(__name__)
 CORS(app)
@@ -29,32 +32,39 @@ def playerUrlSubmit():
     data = request.get_json()
     print("Received JSON_URL", data)
 
-    player_url = data.get("url")
+    playerSubmition = data.get("url")
+
+    if "/" in playerSubmition:
+        playerID = playerSubmition.split("/")[-1]
+    else:
+        playerID = playerSubmition
+
 
     #Check if last String in player_url split is a number (playerCode) or not (could be development page for ex: /D)
-    last_string = player_url.split("/")[-1]
-    player_code = last_string if last_string.isnumeric() else player_url.split("/")[-2]
 
 
     wanted_year = data.get("player_year")
     if wanted_year == "Current":
 
-        player_skills = get_player_info(player_url)
+        player_skills = get_player_info(playerID)
     else:
-        predicted_measureables = getPredictedMeasureables(player_code)
+        predicted_measureables = getPredictedMeasureables(playerID)
         wanted_year = wanted_year[-1]
-        predicted_skills = getPredictedSkills(player_code,wanted_year)
+
+
+        predicted_skills = getPredictedSkills(playerID,wanted_year)
 
         player_skills = {**predicted_measureables, **predicted_skills}
 
 
-
-    print(player_skills)
+    #print("THESE SKILLS BELOWW")
+    #print()
+    #print(player_skills)
 
     return jsonify({"message": "Player Skills received successfully", "player_skills": player_skills})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=2000)
 
 
 
@@ -65,3 +75,4 @@ if __name__ == '__main__':
     'Str': 13, 'IDef': 16, 'Spd': 9, 'PDef': 9, 'Sta': 12, 'height': 82.0, 'wingspan': 90.0, 'weight': 215.0, 
     'vertical': 33.5}
     '''
+

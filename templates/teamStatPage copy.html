@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{header_text}}</title>
+
+  <style>
+    :root {
+      --bg-dark: rgb(29, 30, 34);
+      --bg-medium: #1e1f23;
+      --row-bg: #222327;
+      --row-hover: #2a2b30;
+      --fg-light: #e0e0e0;
+      --fg-muted: #888;
+      --column-highlight: rgba(77, 166, 255, 0.15);
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--fg-light);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow: hidden;
+    }
+
+    #main {
+      width: 98%;
+      max-width: 1800px;
+      height: calc(100vh - 40px);
+      padding: 30px;
+      background-color: var(--bg-medium);
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4da6ff;
+      margin-bottom: 15px;
+    }
+
+    h1 a {
+      color: inherit;
+      text-decoration: none;
+    }
+    h1 a:hover {
+      text-decoration: underline;
+    }
+
+    .table-container {
+      width: 100%;
+    }
+
+    table.stats-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+
+    th {
+      background: transparent;
+      border: none;
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fg-muted);
+      font-weight: bold;
+      padding: 6px 12px;
+      position: relative;
+      user-select: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    th.sortable:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    th.sortable::after {
+      content: '';
+      position: absolute;
+      right: 6px;
+      font-size: 0.7em;
+      color: #fff;
+    }
+    th.sortable[data-sort="asc"]::after { content: '▲'; }
+    th.sortable[data-sort="desc"]::after { content: '▼'; }
+
+    th.highlighted-column {
+      background-color: var(--column-highlight) !important;
+    }
+
+    tbody tr {
+      background-color: var(--row-bg);
+      border-radius: 8px;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    tbody tr:hover {
+      background-color: var(--row-hover);
+      transform: scale(1.002);
+    }
+
+    td {
+      border: none;
+      background: transparent;
+      padding: 12px;
+      font-size: 0.9em;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+      vertical-align: middle;
+      transition: background-color 0.2s ease;
+    }
+
+    /* Player name column only */
+    #playerTable td:first-child {
+      text-align: left;
+      color: #ffffff;
+      font-weight: bold;
+      padding-left: 16px;
+    }
+
+    /* Highlighted column cells */
+    td.highlighted-column {
+      background-color: var(--column-highlight) !important;
+    }
+
+    /* Keep the name column styling even when highlighted */
+    #playerTable td.highlighted-column:first-child {
+      background: linear-gradient(to right, var(--column-highlight) 0%, var(--column-highlight) 100%) !important;
+    }
+
+    /* Vertical separators */
+    th:not(:first-child), td:not(:first-child) {
+      box-shadow: inset 1px 0 0 rgba(255,255,255,0.04);
+    }
+
+    /* Player name links */
+    td a {
+      color: inherit;
+      text-decoration: none;
+    }
+    td a:hover {
+      text-decoration: underline;
+    }
+
+    .home-button {
+      display: inline-block;
+      margin: 15px auto 0 auto;
+      padding: 10px 22px;
+      font-weight: bold;
+      color: white;
+      background-color: #007BFF;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+    .home-button:hover { background-color: #0056b3; }
+
+    .player-table-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+
+
+    .player-table-wrapper::-webkit-scrollbar {
+      width: 6px;
+    }
+    .player-table-wrapper::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+    }
+
+    .percentile {
+      font-size: 0.75em;      
+      font-weight: bold;
+      color: rgba(255, 255, 255, 0.5); 
+    }
+
+
+    .gradient-bar-container {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 300px; 
+        z-index: 999;
+    }
+
+    .gradient-labels {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 4px;
+    }
+
+    .gradient-label-left,
+    .gradient-label-right {
+        font-size: 0.75em;
+        color: var(--fg-muted);
+    }
+
+    .gradient-bar {
+        width: 100%;
+        height: 10px;
+        border-radius: 5px;
+        background-image: linear-gradient(to right, rgb(255, 50, 50),  rgb(100, 100, 100), rgb(100, 100, 100), rgb(0, 255, 150)    );
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="main">
+    <!-- Determine player link suffix -->
+    {% set suffix = "" %}
+
+    {% if "Overall" in header_text %}
+    {% set suffix = "X" %}
+    {% elif "Playoff" in header_text %}
+    {% set suffix = "P" %}
+    {% elif "Conference" in header_text %}
+    {% set suffix = "C" %}
+    {% elif "Tournament" in header_text %}
+    {% set suffix = "T" %}
+    {% endif %}
+
+    <h1><a href="https://onlinecollegebasketball.org/statistics/{{ team_id }}/{{ season }}/{{ suffix }}" target="_blank">{{header_text}}</a></h1>
+
+    <!-- TEAM STATS -->
+    <div class="table-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>GP</th>
+            <th>Pace</th>
+            <th title="Offensive Rating: Points Scored per 100 possessions">ORtg</th>
+            <th title="Defensive Rating: Points Allowed per 100 possessions">DRtg</th>
+            <th title="Net Rating: Point Differential per 100 possessions">NetRtg</th>
+            <th title="Effective Field Goal Percentage: Adjusted for 3-point shots">eFG%</th>
+            <th title="Points in the Paint Percentage: Share of total points scored in the paint">PITP%</th>
+            <th title="Two-Point Field Goal Percentage">2P%</th>
+            <th title="Three-Point Attempt Rate: Share of field goal attempts from three">3PAr</th>            
+            <th title="Three-Point Field Goal Percentage">3P%</th>
+            <th title="Free Throw Rate: Free throw attempts per field goal attempt">FTr</th>
+            <th title="Free Throw Percentage">FT%</th>
+            <th title="Offensive Rebound Percentage: Share of available offensive rebounds secured">ORB%</th>
+            <th title="Defensive Rebound Percentage: Share of available defensive rebounds secured">DRB%</th>
+            <th title="Turnover Percentage: Turnovers per 100 possessions">TO%</th>
+          </tr>
+        </thead>
+          <tbody>
+            <tr>
+              <td><strong>Team</strong></td>
+              <td>{{ team_stats["GP"] }}</td>
+
+              <td>
+                {{ "%.1f"|format(team_stats["Pace"]["value"]) }}
+                <div class="percentile" style="color: {{ team_stats["Pace"]["color"] }};">{{ team_stats["Pace"]["percentile"] }}</div>
+              </td>
+
+              <td>{{ team_stats["ORtg"]["value"] }}
+                <div class="percentile" style="color: {{ team_stats["ORtg"]["color"] }};">{{ team_stats["ORtg"]["percentile"] }}</div>
+              </td>
+              <td>{{ team_stats["DRtg"]["value"] }}
+                <div class="percentile" style="color: {{ team_stats["DRtg"]["color"] }};">{{ team_stats["DRtg"]["percentile"] }}</div>
+              </td>
+              <td>{{ team_stats["NETRtg"]["value"] }}
+                <div class="percentile" style="color: {{ team_stats["NETRtg"]["color"] }};">{{ team_stats["NETRtg"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {% if team_stats["eFG_P"]["value"] == "-" %}
+                  -
+                {% else %}
+                  {{ "%.3f"|format(team_stats["eFG_P"]["value"])|replace("0.", ".") }}
+                  <div class="percentile" style="color: {{ team_stats["eFG_P"]["color"] }};">{{ team_stats["eFG_P"]["percentile"] }}</div>
+                {% endif %}
+              </td>
+
+              <td>
+                {{ "%.3f"|format(team_stats["PITP_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["PITP_P"]["color"] }};">{{ team_stats["PITP_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(team_stats["Two_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["Two_P"]["color"] }};">{{ team_stats["Two_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(team_stats["ThreePAr"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["ThreePAr"]["color"] }};">{{ team_stats["ThreePAr"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(team_stats["Three_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["Three_P"]["color"] }};">{{ team_stats["Three_P"]["percentile"] }}</div>
+              </td>
+
+
+
+              <td>
+                {{ "%.3f"|format(team_stats["FTr"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["FTr"]["color"] }};">{{ team_stats["FTr"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(team_stats["FT_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["FT_P"]["color"] }};">{{ team_stats["FT_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(team_stats["ORB_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["ORB_P"]["color"] }};">{{ team_stats["ORB_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(team_stats["DRB_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["DRB_P"]["color"] }};">{{ team_stats["DRB_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(team_stats["TO_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ team_stats["TO_P"]["color"] }};">{{ team_stats["TO_P"]["percentile"] }}</div>
+              </td>
+            </tr>
+          </tbody>
+
+          <tbody>
+            <tr>
+              <td><strong>Opponent</strong></td>
+              <td>{{ opp_stats["GP"] }}</td>
+              <td>
+                {{ "%.1f"|format(opp_stats["Pace"]["value"]) }}
+                <div class="percentile" style="color: {{ opp_stats["Pace"]["color"] }};">{{ opp_stats["Pace"]["percentile"] }}</div>
+              </td>
+              <td>{{ opp_stats["ORtg"] }}</td>
+              <td>{{ opp_stats["DRtg"] }}</td>
+              <td>{{ opp_stats["NETRtg"] }}</td>
+
+              <td>
+                {% if opp_stats["eFG_P"]["value"] == "-" %}
+                  -
+                {% else %}
+                  {{ "%.3f"|format(opp_stats["eFG_P"]["value"])|replace("0.", ".") }}
+                  <div class="percentile" style="color: {{ opp_stats["eFG_P"]["color"] }};">{{ opp_stats["eFG_P"]["percentile"] }}</div>
+                {% endif %}
+              </td>
+
+              <td>
+                {{ "%.3f"|format(opp_stats["PITP_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["PITP_P"]["color"] }};">{{ opp_stats["PITP_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(opp_stats["Two_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["Two_P"]["color"] }};">{{ opp_stats["Two_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(opp_stats["ThreePAr"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["ThreePAr"]["color"] }};">{{ opp_stats["ThreePAr"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(opp_stats["Three_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["Three_P"]["color"] }};">{{ opp_stats["Three_P"]["percentile"] }}</div>
+              </td>
+
+
+              <td>
+                {{ "%.3f"|format(opp_stats["FTr"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["FTr"]["color"] }};">{{ opp_stats["FTr"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.3f"|format(opp_stats["FT_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["FT_P"]["color"] }};">{{ opp_stats["FT_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(opp_stats["ORB_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["ORB_P"]["color"] }};">{{ opp_stats["ORB_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(opp_stats["DRB_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["DRB_P"]["color"] }};">{{ opp_stats["DRB_P"]["percentile"] }}</div>
+              </td>
+
+              <td>
+                {{ "%.1f"|format(opp_stats["TO_P"]["value"])|replace("0.", ".") }}
+                <div class="percentile" style="color: {{ opp_stats["TO_P"]["color"] }};">{{ opp_stats["TO_P"]["percentile"] }}</div>
+              </td>
+            </tr>
+          </tbody>
+
+
+      </table>
+    </div>
+
+    <!-- PLAYER EPM -->
+    <div class="table-container player-table-wrapper">
+      <table class="stats-table" id="playerTable">
+        <thead>
+          <tr>
+            <th class="sortable" onclick="sortTable(0)">Player</th>
+            <th class="sortable" onclick="sortTable(1)">Pos</th>
+            <th class="sortable" onclick="sortTable(2)">GS</th>
+            <th class="sortable" onclick="sortTable(3)">GP</th>
+            <th class="sortable" onclick="sortTable(4)">Min</th>
+            <th class="sortable" onclick="sortTable(5)" title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">OPM</th>
+            <th class="sortable" onclick="sortTable(6)" title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">DPM</th>
+            <th class="sortable" onclick="sortTable(7)" title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">EPM</th>
+            <th class="sortable" onclick="sortTable(8)" title="Value Over Replacement Player: Cumulative version of EPM using Min and GP">VORP</th>
+
+            <th class="sortable" onclick="sortTable(9)" title="PTS per 56 Possessions">PTS / 56</th>
+            <th class="sortable" onclick="sortTable(10)"
+                title="True Shooting Percentage: A measure of shooting efficiency that accounts for field goals, three-point field goals, and free throws.">
+                TS%
+            </th>
+
+            <th class="sortable" onclick="sortTable(11)"
+                title="Three-Point Attempt Rate: The percentage of a player’s field goal attempts that come from three-point range.">
+                3PAr
+            </th>
+            <th class="sortable" onclick="sortTable(12)"
+                title="Free Throw Rate: The number of free throw attempts per field goal attempt.">
+                FTr
+            </th>
+            <th class="sortable" onclick="sortTable(13)"
+                title="Offensive Rebound Percentage: The percentage of available offensive rebounds a player grabs while on the floor.">
+                ORB%
+            </th>
+
+            <th class="sortable" onclick="sortTable(14)"
+                title="Defensive Rebound Percentage: The percentage of available defensive rebounds a player grabs while on the floor.">
+                DRB%
+            </th>
+
+            <th class="sortable" onclick="sortTable(15)"
+                title="Total Rebound Percentage: The percentage of available rebounds a player grabs while on the floor.">
+                TRB%
+            </th>            
+
+            <th class="sortable" onclick="sortTable(16)"
+                title="Assist Percentage: The percentage of teammate field goals a player assisted while on the floor.">
+                AST%
+            </th>
+          
+            <th class="sortable" onclick="sortTable(17)"
+                title="Turnover Percentage: The percentage of a player’s possessions that end in a turnover.">
+                TOV%
+            </th>
+
+            <th class="sortable" onclick="sortTable(18)"
+                title="Steal Percentage: The percentage of opponent possessions that end in a steal by the player while on the floor.">
+                STL%
+            </th>
+
+            <th class="sortable" onclick="sortTable(19)"
+                title="Block Percentage: The percentage of opponent two-point field goal attempts blocked by the player while on the floor.">
+                BLK%
+            </th>  
+
+            <th class="sortable" onclick="sortTable(20)"
+                title="Opponent Effective Field Goal Percentage: The effective field goal percentage allowed by the player.">
+                OeFG%
+            </th>
+
+            <th class="sortable" onclick="sortTable(21)"
+                title="Usage Percentage: The percentage of team plays used by a player while on the floor.">
+                USG%
+            </th>
+         
+
+          </tr>
+        </thead>
+          <tbody>
+            {% for player in player_stats %}
+            <tr>
+              <td><a href="https://onlinecollegebasketball.org/player/{{ player.playerID }}/{{ suffix }}" target="_blank">{{ player.Name }}</a></td>
+              <td>{{ player.Position }}</td>
+              <td>{{ player.GS }}</td>
+              <td>{{ player.GP }}</td>
+              <td>{{ player.Min }}</td>
+
+              <td>
+                <div>{{ player.OPM.value }}</div>
+                <div class="percentile" style="color: {{ player.OPM.color }};">{{ player.OPM.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ player.DPM.value }}</div>
+                <div class="percentile" style="color: {{ player.DPM.color }};">{{ player.DPM.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ player.EPM.value }}</div>
+                <div class="percentile" style="color: {{ player.EPM.color }};">{{ player.EPM.percentile }}</div>
+              </td>
+
+              <td style="color: {{ epm_to_rgb(player.VORP, -2, 8) }}; font-weight:bold;">{{ player.VORP }}</td>
+
+              <td>
+                <div>{{ player.PTS_per56.value }}</div>
+                <div class="percentile" style="color: {{ player.PTS_per56.color }};">{{ player.PTS_per56.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ "%.3f"|format(player.TS.value)|replace("0.", ".") }}</div>
+                <div class="percentile" style="color: {{ player.TS.color }};">{{ player.TS.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ "%.3f"|format(player.ThreePAr.value)|replace("0.", ".") }}</div>
+                <div class="percentile" style="color: {{ player.ThreePAr.color }};">{{ player.ThreePAr.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ "%.3f"|format(player.FTr.value)|replace("0.", ".") }}</div>
+                <div class="percentile" style="color: {{ player.FTr.color }};">{{ player.FTr.percentile }}</div>
+              </td>
+
+              <td>
+                <div>{{ player.ORB_P.value }}</div>
+                <div class="percentile" style="color: {{ player.ORB_P.color }};">{{ player.ORB_P.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ player.DRB_P.value }}</div>
+                <div class="percentile" style="color: {{ player.DRB_P.color }};">{{ player.DRB_P.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ player.TRB_P.value }}</div>
+                <div class="percentile" style="color: {{ player.TRB_P.color }};">{{ player.TRB_P.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ player.AST_P.value }}</div>
+                <div class="percentile" style="color: {{ player.AST_P.color }};">{{ player.AST_P.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ player.TO_P.value }}</div>
+                <div class="percentile" style="color: {{ player.TO_P.color }};">{{ player.TO_P.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ player.STL_P.value }}</div>
+                <div class="percentile" style="color: {{ player.STL_P.color }};">{{ player.STL_P.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ player.BLK_P.value }}</div>
+                <div class="percentile" style="color: {{ player.BLK_P.color }};">{{ player.BLK_P.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ "-" if player.O_eFG_P.value in ["-", None, ""] else "%.3f"|format(player.O_eFG_P.value|float)|replace("0.", ".") }}</div>
+                <div class="percentile" style="color: {{ player.O_eFG_P.color }};">{{ player.O_eFG_P.percentile }}</div>
+              </td>
+              <td>
+                <div>{{ player.USG_P.value }}</div>
+                <div class="percentile" style="color: {{ player.USG_P.color }};">{{ player.USG_P.percentile }}</div>
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+
+
+      </table>
+      
+    </div>
+  
+    <a href="{{ url_for('home') }}" class="home-button">Home</a>
+  </div>
+
+  <!-- Gradient bar  -->
+  <div class="gradient-bar-container">
+      <div class="gradient-labels">
+          <span class="gradient-label-left">Bad</span>
+          <span class="gradient-label-right">Good</span>
+      </div>
+      <div class="gradient-bar"></div>
+  </div>
+
+  <script>
+    let sortDirections = {};
+    let currentSortedColumn = null;
+
+    function sortTable(col) {
+      const table = document.getElementById("playerTable");
+      const tbody = table.tBodies[0];
+      const rows = Array.from(tbody.rows);
+      const headerRow = table.tHead.rows[0];
+      
+      // Clear previous highlighting
+      if (currentSortedColumn !== null) {
+        // Clear header highlighting
+        headerRow.cells[currentSortedColumn].classList.remove('highlighted-column');
+        
+        // Clear cell highlighting for all rows
+        rows.forEach(row => {
+          row.cells[currentSortedColumn].classList.remove('highlighted-column');
+        });
+      }
+      
+      // Set new sort direction
+      sortDirections[col] = !sortDirections[col];
+      
+      // Highlight the new column
+      headerRow.cells[col].classList.add('highlighted-column');
+      
+      // Sort rows
+      rows.sort((a, b) => {
+        const aText = a.cells[col].innerText.trim();
+        const bText = b.cells[col].innerText.trim();
+        const aNum = parseFloat(aText);
+        const bNum = parseFloat(bText);
+
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          return sortDirections[col] ? aNum - bNum : bNum - aNum;
+        }
+        return sortDirections[col] ? aText.localeCompare(bText) : bText.localeCompare(aText);
+      });
+
+      // Re-append rows in sorted order and highlight cells
+      rows.forEach(r => {
+        tbody.appendChild(r);
+        // Highlight the sorted column cell in each row
+        r.cells[col].classList.add('highlighted-column');
+      });
+
+      // Update sort indicators
+      [...headerRow.cells].forEach((th, i) => {
+        if (i === col) {
+          th.setAttribute("data-sort", sortDirections[col] ? "asc" : "desc");
+        } else {
+          th.removeAttribute("data-sort");
+        }
+      });
+      
+      
+      currentSortedColumn = col;
+    }
+    
+    
+    document.addEventListener('DOMContentLoaded', function() {
+
+    });
+  </script>
+</body>
+</html>

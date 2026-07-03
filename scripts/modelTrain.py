@@ -1,5 +1,6 @@
 
 #Input the player's name, position (Perimeter or Big), and URL and get their predicted stats for the season
+#DO NOT USE STRENGTH AS A FEATURE
 
 import pandas as pd
 import numpy as np
@@ -16,22 +17,28 @@ from sklearn.decomposition import PCA
 
 from sklearn.feature_selection import RFE
 
+'''
+
+
+'''
 
 
 #df = pd.read_csv("DataCSVS/cleanedPlayerData41-42-43.csv", encoding='latin1')
-df_total = pd.read_csv("DataCSVS/2045-per56.csv", encoding='latin1')
-df_PG = pd.read_csv("DataCSVS/PG-per56.csv", encoding='latin1')
-df_SG = pd.read_csv("DataCSVS/SG-per56.csv", encoding='latin1')
-df_SF = pd.read_csv("DataCSVS/SF-per56.csv", encoding='latin1')
-df_PF = pd.read_csv("DataCSVS/PF-per56.csv", encoding='latin1')
-df_C = pd.read_csv("DataCSVS/C-per56.csv", encoding='latin1')
-df_Perimeter = pd.read_csv("DataCSVS/Perimeter-per56.csv", encoding='latin1')
-df_Bigs = pd.read_csv("DataCSVS/Bigs-per56.csv", encoding='latin1')
+df_total = pd.read_csv("DataCSVS/44-45-46-per56-bpm-scaled.csv", encoding='latin1')
+
+#Remove Same Name Players on Same Teams
+ 
+# Drop rows where player_id is 226586 or 226587 (Same names on same team)
+df_total = df_total[~df_total['player_id'].isin([221906, 226586])]
+
+# Drop rows where player_name contains "William" or "Anderson"a
+df_total = df_total[~df_total['name'].str.contains("William|Anderson", case=False, na=False)]
+
 
 
 def finishing(df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'Fin',
-        'Reb', 'IDef', 'PDef', 'IQ',  'Str', 'Spd', 'Sta', 'Hnd', 'Drv',
+        'Reb', 'IDef', 'PDef', 'IQ',  'Spd', 'Sta', 'Hnd', 'Drv',
             'F_P']
 
     df = df[df['F_A'] >= .5]
@@ -72,13 +79,15 @@ def finishing(df):
 def insideShot(position, df):
 
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Fin',
-        'Reb', 'IQ', 'Str', 'Spd', 'Sta',
+        'Reb', 'IQ', 'Spd', 'Sta',
             'IS_P']
+            
 
     if position == "Bigs":
-
+        df = df[df["Primary_Position"].isin(["PF", "C"])]
         df = df[df['IS_A'] >= 3] #For Bigs
     else:
+        df = df[df["Primary_Position"].isin(["PG", "SG","SF"])]
         df = df[df['IS_A'] >= 1] #For Perimeter
 
     df = df[features]
@@ -236,10 +245,15 @@ def freeThrowShooting(df):
 
 def rebounding(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS',
-        'Reb', 'IQ',  'Str', 'Spd', 'Sta',
+        'Reb', 'IQ',  'Spd', 'Sta',
             'Rebs']
 
+    df = df[df["Primary_Position"] == position]
+
     df = df[features]
+
+    
+    
 
 
     data = df
@@ -273,12 +287,14 @@ def rebounding(position, df):
 
 def assists(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
-        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Str', 'Spd', 'Sta',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Sta',
             'AST']
 
-
+    df = df[df["Primary_Position"] == position]
 
     df = df[features]
+
+    
 
     data = df
     X = data.drop('AST', axis=1)
@@ -311,10 +327,14 @@ def assists(position, df):
 
 def steals(position, df):
     features = ['height', 'wingspan', 'vertical', 
-            'IDef', 'PDef', 'IQ', 'Str', 'Spd', 'Sta',
+            'IDef', 'PDef', 'IQ', 'Spd', 'Sta',
             'STL']
 
+    df = df[df["Primary_Position"] == position]
+
     df = df[features]
+
+    
 
 
     data = df
@@ -349,10 +369,14 @@ def steals(position, df):
 
 def blocks(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical',
-        'Reb', 'IDef', 'PDef',  'Str', 'Spd', 'Sta',
+        'Reb', 'IDef', 'PDef',  'Spd', 'Sta',
             'BLK']
 
+    
+    df = df[df["Primary_Position"] == position]
     df = df[features]
+
+    
 
     data = df
     X = data.drop('BLK', axis=1)
@@ -390,11 +414,13 @@ def ast_to(position, df):
     df["AST/TO"] = df["AST"] / df["TO"]
 
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
-        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Str', 'Spd', 'Sta',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Sta',
             'AST/TO']
 
-
+    df = df[df["Primary_Position"] == position]
     df = df[features]
+
+    
 
     data = df
     X = data.drop('AST/TO', axis=1)
@@ -428,11 +454,13 @@ def ast_to(position, df):
 
 def twoPointOFG(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical',
-        'IDef', 'PDef', 'IQ',  'Str', 'Spd', 'Sta',
+        'IDef', 'PDef', 'IQ',  'Spd', 'Sta',
             'O_2P_P']
 
-
+    df = df[df["Primary_Position"] == position]
     df = df[features]
+
+
 
     data = df
     X = data.drop('O_2P_P', axis=1)
@@ -474,8 +502,12 @@ def threePointOFG(df):
 
     df = df[df['O_3P_A'] >= 4] #Use Perimeter (for both)
 
+
+    df = df[df["Primary_Position"].isin(["PG", "SG", "SF"])]
+
     df = df[features]
 
+    
     data = df
     X = data.drop('O_3P_P', axis=1)
     y = data['O_3P_P']
@@ -508,10 +540,13 @@ def threePointOFG(df):
 
 def foulsDrawn(position, df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
-        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Str', 'Sta',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Sta',
             'FD']
-
+    
+    df = df[df["Primary_Position"] == position]
     df = df[features]
+
+
 
     data = df
     X = data.drop('FD', axis=1)
@@ -545,14 +580,17 @@ def foulsDrawn(position, df):
 
 def OBPM(position,df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
-        'Reb', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Str', 'Sta',
-            'OBPM']
+        'Reb', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Sta',
+            'OBPM_scaled']
 
+    df = df[df["Primary_Position"] == position]
     df = df[features]
 
+
+
     data = df
-    X = data.drop('OBPM', axis=1)
-    y = data['OBPM']
+    X = data.drop('OBPM_scaled', axis=1)
+    y = data['OBPM_scaled']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -578,21 +616,24 @@ def OBPM(position,df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Models-NoD/OBPM_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'BPM-Scaled-Model/OBPM_{position}.pkl')
 
 
 
 def DBPM(position,df):
 
     features = ['height', 'weight', 'wingspan', 'vertical',
-        'Reb', 'IDef', 'PDef', 'IQ', 'Spd', 'Str', 'Sta',
-            'DBPM']
+        'Reb', 'IDef', 'PDef', 'IQ', 'Spd', 'Sta',
+            'DBPM_scaled']
 
+    df = df[df["Primary_Position"] == position]
     df = df[features]
 
+
+
     data = df
-    X = data.drop('DBPM', axis=1)
-    y = data['DBPM']
+    X = data.drop('DBPM_scaled', axis=1)
+    y = data['DBPM_scaled']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -618,19 +659,20 @@ def DBPM(position,df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'Models-NoD/DBPM_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'BPM-Scaled-Model/DBPM_{position}.pkl')
 
 
 def BPM(position,df):
     features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
-        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Str', 'Sta',
-            'BPM']
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Sta',
+            'BPM_scaled']
 
+    df = df[df["Primary_Position"] == position]
     df = df[features]
 
     data = df
-    X = data.drop('BPM', axis=1)
-    y = data['BPM']
+    X = data.drop('BPM_scaled', axis=1)
+    y = data['BPM_scaled']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -656,44 +698,519 @@ def BPM(position,df):
     avg_pred_value = np.mean(y_pred_test)
 
     # Save model, scaler, and PCA
-    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Models-NoD/BPM_{position}.pkl')
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'BPM-Scaled-Model/BPM_{position}.pkl')
 
+
+#EPM+
+
+def OEPM(position,df):
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Sta',
+            'OEPM']
+    
+    df = df.copy()
+
+    df = df[df["Primary_Position"] == position]
+
+    df = df[features]
+
+    data = df
+    X = data.drop('OEPM', axis=1)
+    y = data['OEPM']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'EPM+_Model//OPM+_{position}.pkl')
+
+
+
+def DEPM(position,df):
+
+    features = ['height', 'weight', 'wingspan', 'vertical',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Spd', 'Sta',
+            'DEPM']
+    
+    df = df.copy()
+
+    df = df[df["Primary_Position"] == position]
+
+    df = df[features]
+
+
+
+    data = df
+    X = data.drop('DEPM', axis=1)
+    y = data['DEPM']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns,avg_pred_value, df), f'EPM+_Model//DPM+_{position}.pkl')
+
+
+def EPM_(position,df):
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Sta',
+            'EPM']
+    
+    df = df.copy()
+
+    df = df[df["Primary_Position"] == position]
+
+    df = df[features]
+
+
+
+    data = df
+    X = data.drop('EPM', axis=1)
+    y = data['EPM']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'EPM+_Model/EPM+_{position}.pkl')
+
+
+
+
+#Adj_EPM+
+
+def adj_OEPM(position,df):
+
+    if position in ["PG", "SG"]:
+        features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+         'IQ', 'Pass', 'Hnd', 'Drv', 'Spd',   'Sta',
+            'adj_OEPM_scaled']
+    else:
+        features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd',   'Sta',
+            'adj_OEPM_scaled']
+
+
+    
+    df = df.copy()
+
+    df = df[df["Primary_Position"] == position]
+
+    df = df[features]
+
+    feat = features[-1]
+
+
+    data = df
+    X = data.drop(feat, axis=1)
+    y = data[feat]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Adj_EPM+_Model/Adj_OPM+_{position}.pkl')
+
+
+
+def adj_DEPM(position,df):
+    
+    if position in ["PG", "SG"]:
+        features = ['height', 'weight', 'wingspan', 'vertical',
+         'IDef', 'PDef', 'IQ', 'Spd',  'Sta',
+            'adj_DEPM_scaled']
+    else:
+        features = ['height', 'weight', 'wingspan', 'vertical',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Spd', 'Sta',
+            'adj_DEPM_scaled']
+        
+    
+
+    
+    df = df.copy()
+
+    df = df[df["Primary_Position"] == position]
+
+    df = df[features]
+
+    feat = features[-1]
+
+
+    data = df
+    X = data.drop(feat, axis=1)
+    y = data[feat]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Adj_EPM+_Model/Adj_DPM+_{position}.pkl')
+
+
+def adj_EPM(position,df):
+    if position in ["PG", "SG"]:
+        features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+         'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Sta',
+            'adj_EPM_scaled']
+    else:
+        features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Spd', 'Sta',
+            'adj_EPM_scaled']
+    
+    df = df.copy()
+
+    df = df[df["Primary_Position"] == position]
+
+    df = df[features]
+
+    feat = features[-1]
+
+
+    data = df
+    X = data.drop(feat, axis=1)
+    y = data[feat]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'Adj_EPM+_Model/Adj_EPM+_{position}.pkl')
+
+
+
+################################## RAPM #############################################
+
+
+def ORAPM(position,df):
+
+    orapm = f"{position}_orapm"
+
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IQ', 'Pass', 'Hnd', 'Drv', 'Str',  'Spd', 'Sta',
+            f'{orapm}']
+    
+    df = df.copy()
+
+    position_mins = f"{position.upper()}_Min"
+    df = df[df[position_mins] >= 10]
+    df = df.dropna(subset=[orapm])
+
+    df = df[features]
+
+    feat = features[-1]
+
+
+    data = df
+    X = data.drop(feat, axis=1)
+    y = data[feat]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'RAPM_Model/ORAPM_{position.upper()}.pkl')
+
+def DRAPM(position,df):
+
+    drapm = f"{position}_drapm"
+
+    features = ['height', 'weight', 'wingspan', 'vertical',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Str', 'Spd',  'Sta',
+            f'{drapm}']
+    
+    df = df.copy()
+
+    position_mins = f"{position.upper()}_Min"
+    df = df[df[position_mins] >= 10]
+
+    df = df.dropna(subset=[drapm])
+
+    df = df[features]
+
+    feat = features[-1]
+
+
+    data = df
+    X = data.drop(feat, axis=1)
+    y = data[feat]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'RAPM_Model/DRAPM_{position.upper()}.pkl')
+
+
+def RAPM(position,df):
+
+    rapm = f"{position}_rapm"
+
+    features = ['height', 'weight', 'wingspan', 'vertical', 'IS', 'OS', 'Rng', 'Fin',
+        'Reb', 'IDef', 'PDef', 'IQ', 'Pass', 'Hnd', 'Drv', 'Str', 'Spd', 'Sta',
+            f'{rapm}']
+    
+    df = df.copy()
+
+    position_mins = f"{position.upper()}_Min"
+    df = df[df[position_mins] >= 10]
+
+    df = df.dropna(subset=[rapm])
+
+    df = df[features]
+
+    feat = features[-1]
+
+
+    data = df
+    X = data.drop(feat, axis=1)
+    y = data[feat]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+
+    # Apply PCA to retain 95% of variance
+    pca = PCA(n_components=0.95)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+
+    # Train Ridge Regression model
+    model = Ridge()
+    model.fit(X_train_pca, y_train)
+    
+    X_test_scaled = scaler.transform(X_test)  
+    X_test_pca = pca.transform(X_test_scaled)  # Transform the test set using the fitted PCA
+
+    # Make predictions on the test set
+    y_pred_test = model.predict(X_test_pca)
+
+    # Calculate the average of the predicted values for the test set
+    avg_pred_value = np.mean(y_pred_test)
+
+    # Save model, scaler, and PCA
+    joblib.dump((scaler, pca, model, X_train.columns, avg_pred_value, df), f'RAPM_Model/RAPM_{position.upper()}.pkl')
 
 #Model Training
 
-#'''
 
+'''
 
 finishing(df_total)
 midRange(df_total)
-threePointShooting(df_Perimeter)
+threePointShooting(df_total)
 freeThrowShooting(df_total)
-threePointOFG(df_Perimeter)
+threePointOFG(df_total)
 
 for position in ["Perimeter","Bigs"]:
-    df = pd.read_csv(f"DataCSVS/{position}-per56.csv")
-    insideShot(position,df)
     
+    insideShot(position,df_total)
+    
+'''
+'''
+for position in ["PG","SG","SF","PF",'C']:
+    
+    rebounding(position,df_total)
+    assists(position,df_total)
+    steals(position,df_total)
+    blocks(position,df_total)
+    ast_to(position,df_total)
+    twoPointOFG(position,df_total)
+    foulsDrawn(position,df_total)
+    
+    OBPM(position,df_total)
+    DBPM(position,df_total)
+    BPM(position,df_total)
 
 
+
+for position in ["PG","SG","SF","PF",'C']:
+
+    OEPM(position,df_total)
+    DEPM(position,df_total)
+    EPM_(position,df_total)
 
 
 
 
 
 for position in ["PG","SG","SF","PF",'C']:
-    df = pd.read_csv(f"DataCSVS/{position}-per56.csv")
-    rebounding(position,df)
-    assists(position,df)
-    steals(position,df)
-    blocks(position,df)
-    ast_to(position,df)
-    twoPointOFG(position,df)
-    foulsDrawn(position,df)
-    OBPM(position,df)
-    DBPM(position,df)
-    BPM(position,df)
+    df = pd.read_csv(f"DataCSVS//44-45-46-AdjEPM-Scaled.csv")
+    adj_OEPM(position,df)
+    adj_DEPM(position,df)
+    adj_EPM(position,df)
 
+
+
+'''
+
+#'''
+for position in ["pg","sg","sf","pf",'c']: # Lower Case
+    df = pd.read_csv(f"DataCSVS/46-50-51-PlayerStatSkills-RAPM.csv")
+    
+    ORAPM(position,df)
+    DRAPM(position,df)
+    RAPM(position,df)
 #'''
 
 
@@ -701,10 +1218,5 @@ for position in ["PG","SG","SF","PF",'C']:
 
 
 
-
-
-
-
-#print(givePlayerStats())
 
 

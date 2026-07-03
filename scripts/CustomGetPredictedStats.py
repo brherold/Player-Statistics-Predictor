@@ -87,7 +87,16 @@ def preprocess_and_predict(df, player_df, scaler, pca, model, expected_columns, 
 
 
 def load_model_components(filename):
-    return joblib.load(f'Models-NoD/{filename}.pkl')
+    if "Adj_" in filename:
+        return joblib.load(f'Adj_EPM+_Model/{filename}.pkl')
+    elif "+" in filename:
+        return joblib.load(f'EPM+_Model/{filename}.pkl')
+    elif "BPM" in filename:
+        return joblib.load(f'BPM-Scaled-Model/{filename}.pkl')
+    elif "RAPM" in filename:
+        return joblib.load(f'RAPM_Model/{filename}.pkl')
+    else:
+        return joblib.load(f'Models-NoD/{filename}.pkl')
 
 def format_stat(pred, percent=False):
     value = pred["prediction"] * 100 if percent else pred["prediction"]
@@ -138,6 +147,25 @@ def givePlayerStats(player,position):
     obpm_scaler, obpm_pca, obpm_model, obpm_expected_columns, obpm_avg_pred, df = load_model_components(f"OBPM_{position}")
     dbpm_scaler, dbpm_pca, dbpm_model, dbpm_expected_columns, dbpm_avg_pred , df= load_model_components(f"DBPM_{position}")
     bpm_scaler, bpm_pca, bpm_model, bpm_expected_columns, bpm_avg_pred, df = load_model_components(f"BPM_{position}")
+
+    opm_plus_scaler, opm_plus_pca, opm_plus_model, opm_plus_expected_columns, opm_plus_avg_pred, df = load_model_components(f"OPM+_{position}")
+    dpm_plus_scaler, dpm_plus_pca, dpm_plus_model, dpm_plus_expected_columns, dpm_plus_avg_pred , df= load_model_components(f"DPM+_{position}")
+    epm_plus_scaler, epm_plus_scaler_pca, epm_plus_scaler_model, epm_plus_scaler_expected_columns, epm_plus_scaler_avg_pred, df = load_model_components(f"EPM+_{position}")
+
+    opm_plus_scaler, opm_plus_pca, opm_plus_model, opm_plus_expected_columns, opm_plus_avg_pred, df = load_model_components(f"OPM+_{position}")
+    dpm_plus_scaler, dpm_plus_pca, dpm_plus_model, dpm_plus_expected_columns, dpm_plus_avg_pred , df= load_model_components(f"DPM+_{position}")
+    epm_plus_scaler, epm_plus_scaler_pca, epm_plus_scaler_model, epm_plus_scaler_expected_columns, epm_plus_scaler_avg_pred, df = load_model_components(f"EPM+_{position}")
+
+
+    #Adjusted EPM
+    adj_opm_plus_scaler, adj_opm_plus_pca, adj_opm_plus_model, adj_opm_plus_expected_columns, adj_opm_plus_avg_pred, df_adj_opm = load_model_components(f"Adj_OPM+_{position}")
+    adj_dpm_plus_scaler, adj_dpm_plus_pca, adj_dpm_plus_model, adj_dpm_plus_expected_columns, adj_dpm_plus_avg_pred, df_adj_dpm = load_model_components(f"Adj_DPM+_{position}")
+    adj_epm_plus_scaler, adj_epm_plus_scaler_pca, adj_epm_plus_scaler_model, adj_epm_plus_scaler_expected_columns, adj_epm_plus_scaler_avg_pred, df_adj_epm = load_model_components(f"Adj_EPM+_{position}")
+
+    #RAPM
+    orapm_scaler, orapm_pca, orapm_model, orapm_expected_columns, orapm_avg_pred, df_orapm = load_model_components(f"ORAPM_{position}")
+    drapm_scaler, drapm_pca, drapm_model, drapm_expected_columns, drapm_avg_pred, df_drapm = load_model_components(f"DRAPM_{position}")
+    rapm_scaler, rapm_scaler_pca, rapm_scaler_model, rapm_scaler_expected_columns, rapm_scaler_avg_pred, df_rapm = load_model_components(f"RAPM_{position}")
 
 
     # Dictionary to store all predicted stats
@@ -204,33 +232,115 @@ def givePlayerStats(player,position):
         preprocess_and_predict(df, player_df, threeof_scaler, threeof_pca, threeof_model, threeof_expected_columns, threeof_avg_pred,opposite_comparison=True),
         percent=True
     )
-
-    predicted_player_stats["OPM"] = format_stat(
+#OBPM
+    predicted_player_stats["OBPM"] = format_stat(
         preprocess_and_predict(df, player_df, obpm_scaler, obpm_pca, obpm_model, obpm_expected_columns, obpm_avg_pred, allow_negative=True, is_bpm=True)
     )
-
-    predicted_player_stats["DPM"] = format_stat(
+#DBPM
+    predicted_player_stats["DBPM"] = format_stat(
         preprocess_and_predict(df, player_df, dbpm_scaler, dbpm_pca, dbpm_model, dbpm_expected_columns, dbpm_avg_pred, allow_negative=True, is_bpm=True)
     )
 
-    #Get percentile for EPM
+    #Get percentile for BPM
     epm_percentile = preprocess_and_predict(df, player_df, bpm_scaler, bpm_pca, bpm_model, bpm_expected_columns, bpm_avg_pred, allow_negative=True, is_bpm=True)["percentile"]
     epm_color = preprocess_and_predict(df, player_df, bpm_scaler, bpm_pca, bpm_model, bpm_expected_columns, bpm_avg_pred, allow_negative=True, is_bpm=True)["color"]
-    predicted_player_stats["EPM"] = format_stat(
+    predicted_player_stats["BPM"] = format_stat(
         {
-            "prediction": predicted_player_stats["OPM"]["value"] + predicted_player_stats["DPM"]["value"],
+            "prediction": predicted_player_stats["OBPM"]["value"] + predicted_player_stats["DBPM"]["value"],
             "percentile": epm_percentile,
             "color": epm_color
         }
     )
+#############
+    #EPM +
+    predicted_player_stats["OPM+"] = format_stat(
+        preprocess_and_predict(df, player_df, opm_plus_scaler, opm_plus_pca, opm_plus_model, opm_plus_expected_columns, opm_plus_avg_pred, allow_negative=True, is_bpm=True)
+    )
+
+    predicted_player_stats["DPM+"] = format_stat(
+        preprocess_and_predict(df, player_df, dpm_plus_scaler, dpm_plus_pca, dpm_plus_model, dpm_plus_expected_columns, dpm_plus_avg_pred, allow_negative=True, is_bpm=True)
+    )
+
+    # Get percentile for EPM
+    epm_plus_percentile = preprocess_and_predict(df, player_df, epm_plus_scaler, epm_plus_scaler_pca, epm_plus_scaler_model, epm_plus_scaler_expected_columns, epm_plus_scaler_avg_pred, allow_negative=True, is_bpm=True)["percentile"]
+    epm_plus_color = preprocess_and_predict(df, player_df, epm_plus_scaler, epm_plus_scaler_pca, epm_plus_scaler_model, epm_plus_scaler_expected_columns, epm_plus_scaler_avg_pred, allow_negative=True, is_bpm=True)["color"]
+    predicted_player_stats["EPM+"] = format_stat(
+        {
+            "prediction": predicted_player_stats["OPM+"]["value"] + predicted_player_stats["DPM+"]["value"],
+            "percentile": epm_plus_percentile,
+            "color": epm_plus_color
+        }
+    )
+
+    # Adj EPM +
+    predicted_player_stats["AOPM+"] = format_stat(
+        preprocess_and_predict(df_adj_opm, player_df, adj_opm_plus_scaler, adj_opm_plus_pca, adj_opm_plus_model, adj_opm_plus_expected_columns, adj_opm_plus_avg_pred, allow_negative=True, is_bpm=True)
+    )
+
+    predicted_player_stats["ADPM+"] = format_stat(
+        preprocess_and_predict(df_adj_dpm, player_df, adj_dpm_plus_scaler, adj_dpm_plus_pca, adj_dpm_plus_model, adj_dpm_plus_expected_columns, adj_dpm_plus_avg_pred, allow_negative=True, is_bpm=True)
+    )
+
+    # Get percentile for Adj EPM
+    adj_epm_plus_percentile = preprocess_and_predict(
+        df_adj_epm, player_df, adj_epm_plus_scaler,  adj_epm_plus_scaler_pca, adj_epm_plus_scaler_model, adj_epm_plus_scaler_expected_columns, adj_epm_plus_scaler_avg_pred, allow_negative=True, is_bpm=True
+    )["percentile"]
+
+    adj_epm_plus_color = preprocess_and_predict(
+        df_adj_epm, player_df, adj_epm_plus_scaler, adj_epm_plus_scaler_pca, adj_epm_plus_scaler_model, adj_epm_plus_scaler_expected_columns, adj_epm_plus_scaler_avg_pred, allow_negative=True, is_bpm=True
+    )["color"]
+
+    predicted_player_stats["AEPM+"] = format_stat(
+        {
+            "prediction": predicted_player_stats["AOPM+"]["value"] + predicted_player_stats["ADPM+"]["value"],
+            "percentile": adj_epm_plus_percentile,
+            "color": adj_epm_plus_color
+        }
+    )
+        
+########################
+
+    # RAPM
+    predicted_player_stats["ORAPM"] = format_stat(
+        preprocess_and_predict(df_orapm, player_df, orapm_scaler, orapm_pca, orapm_model, orapm_expected_columns, orapm_avg_pred, allow_negative=True, is_bpm=True)
+    )
+
+    predicted_player_stats["DRAPM"] = format_stat(
+        preprocess_and_predict(df_drapm, player_df, drapm_scaler, drapm_pca, drapm_model, drapm_expected_columns, drapm_avg_pred, allow_negative=True, is_bpm=True)
+    )
+
+
+    rapm_predicts =  preprocess_and_predict(
+        df_rapm, player_df, rapm_scaler, rapm_scaler_pca, rapm_scaler_model, rapm_scaler_expected_columns, rapm_scaler_avg_pred, allow_negative=True, is_bpm=True
+    )
+    
+    # Get percentile for RAPM
+    rapm_percentile = rapm_predicts["percentile"]
+
+    rapm_color = rapm_predicts["color"]
+
+    predicted_player_stats["RAPM"] = format_stat(
+        {
+            "prediction": predicted_player_stats["ORAPM"]["value"] + predicted_player_stats["DRAPM"]["value"],
+            "percentile": rapm_percentile,
+            "color": rapm_color
+        }
+    )
+        
 
     
     return predicted_player_stats
 
 #print(givePlayerStats("https://onlinecollegebasketball.org/player/205173/A","SG"))
 
-            
+'''
+print(givePlayerStats({'Position':'PF','IS': 14, 'IQ': 11, 'OS': 13, 'Pass': 3, 'Rng': 14, 'Hnd': 14, 'Fin': 11, 'Drv': 11, 'Reb': 15, 
+    'Str': 13, 'IDef': 16, 'Spd': 9, 'PDef': 9, 'Sta': 12, 'height': 82.0, 'wingspan': 90.0, 'weight': 215.0, 
+    'vertical': 33.5},"PF"))
 
-#run python -m scripts.flaskGetPredictedStats
+'''
+
+#run python -m scripts.CustomGetPredictedStats
 
 
+#print(givePlayerStats(228161, "SG"))

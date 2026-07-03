@@ -7,10 +7,12 @@ import os
 
 
 
+
 #Given URL of player, it gets the measureables (Height, Weight, Wingspan, Vertical) and their skills and puts it into a hash
 
 def split_number_and_letter(s):
     s = s.replace('↑', '')
+    s = s.replace('↓','')
     # Split the string into parts that contain numbers, fractions, letters, single quotes, and double quotes
     return re.findall(r'\d+|[¼½]|[^\d¼½\'"]+|[\'"]', s)
 
@@ -53,145 +55,159 @@ def Vert_convert_to_inches(height):
     return float(inches_str)
 
 
+# /H Page
+# PlayersInputted File Format -> playerID-H.html (for predicited measureables) or playerID-D.html (for predicted skills)
+def get_player_info_measureable(playerID):
+    
+    try:
+        #playerID = file_path.split('-')
+        with open(f'PlayersInputted/{playerID}-H.html', 'r', encoding='utf-8') as file:
+            html_content = file.read()
+    except Exception as e:
+            suffixes = ["HSFR", "HSSO", "HSJR", "HSSR", "INT", "JCFR", "JCSO"]
+            folder = "C:/Users/branh/Documents/Hardwood PROJECTSSSSSS/Hardwood Recruit Searcher-EPM/PlayersHTML"
+            for suffix in suffixes:
+                file_path = os.path.join(folder, f"{playerID}-{suffix}-H.html")
+                if os.path.exists(file_path):
+                    with open(file_path, "r", encoding="utf-8") as file:
+                        html_content = file.read()
+                        #print(html_content)
+                        #print(f"Loaded from {file_path}")
+                    break
+    if html_content is None:
+        print(f"No file found for {playerID}")
+        return None
 
-def transform_player_data(input_data,playerURL,soup):
-    # Define the mapping from input keys to required keys
-    key_mapping = {
-        'Age': None,  # Not used in the output
-        'InsideShot': 'IS',
-        'BasketballIQ': 'IQ',
-        'OutsideShot': 'OS',
-        'Passing': 'Pass',
-        'ShootingRange': 'Rng',
-        'BallHandling': 'Hnd',
-        #'Weight': 'Weight',
-        'Finishing': 'Fin',
-        'Driving': 'Drv',
-        "Rebounding": 'Reb',
-        'Strength': 'Str',
-        'InteriorDefense': 'IDef',
-        'Speed': 'Spd',
-        'PerimeterDefense': 'PDef',
-        'Stamina': 'Sta',
-        "Height" : "Height",
-        'Weight': 'Weight',
-        "Wingspan": "Wingspan",
-        "Vertical": "Vertical",
-        "Fresh_Height": "Fresh_Height",
-        "Fresh_Weight": "Fresh_Weight"
-    }
-    # Initialize the output dictionary
-    output_data = {}
-    
-    # Apply the mapping to transform the input dictionary
-    for key, new_key in key_mapping.items():
-        if new_key is not None and key in input_data:
-            output_data[new_key] = input_data[key]
+    #print("QUAG")
+    soup = BeautifulSoup(html_content, "html.parser")
 
-    #output_data["Player_ID"] = int(playerURL.split("/")[-1])
-    player_id_string = ""
-    for c in playerURL:
-        try:
-            x = int(c) + 1
-            player_id_string = player_id_string + c
-        except:
-            pass
+    #_curr measureables are the current measureables of the highschool player we are given to then predict measureables after
+    player_info = {}
+    fullinfoList = soup.find("table").find_all("tr")
     
-    output_data["Player_ID"] = int(player_id_string)
+
+    #'''
     
+    table_start = 3 if "College" not in fullinfoList[2].text else 4
+    
+    infoList = fullinfoList[table_start:]
+    #'''
+    #Gets Current (Fully Grown) Measureables
+    for i, info in enumerate(infoList):
+        #3 HT, 4 WT, 5 Wing, 6 Vert, 12 RecEval (for getting predicted height)
+        text = info.text.strip().replace(" ", "")
+        separated = split_number_and_letter(text)
+        #print(separated)
+        if separated:
+            if 'Height' in text:
+                separated = separated[-4:]
+            if 'Wingspan' in text:
+                separated = separated[-4:]
+            if 'Vertical' in text:
+                separated = separated[-4:]
+            
+            # Handle special cases
+            if 'Weight' in text:
+                player_info['weight_curr'] = float(f"{separated[1]}")
+                
+                start_idx = 2
+                separated[start_idx] = separated[start_idx].replace("lbs.","")
+
+            if 'ProjectedHeight' in text:
+                projected_height_uncleaned = text.replace(".", ":").split(":")[-2]
+                projected_height = convert_to_inches(projected_height_uncleaned)
+                player_info["height_projected"] = projected_height            
+
+
+    #'''
+    #print(player["PlayerID"], split_number_and_letter(infoList[3].text.strip().replace(" ", "")))
+    player_info["height_curr"] = convert_to_inches(extract_length(split_number_and_letter(infoList[3].text.strip().replace(" ", ""))))
+    player_info["wingspan_curr"] = convert_to_inches(extract_length(split_number_and_letter(infoList[5].text.strip().replace(" ", ""))))
+    player_info["vertical_curr"] = Vert_convert_to_inches(extract_length(split_number_and_letter(infoList[6].text.strip().replace(" ", ""))))
+    
+   
+
+    #Get Freshman(and other) Height and Weight
+    soup = BeautifulSoup(html_content, "html.parser")
+
+    player_class = ""
+
+    try:
+        table = soup.find("table", class_="stats-table-medium_font")
+        rows = table.find_all('tr')
+
+        #Gets Freshman Height and wingpspan
+        #print(row)
+        height = convert_to_inches((rows[1].find_all('td')[33]).text)
+
+        # For getting Freshman Weight
+        weight_cell = rows[1].find_all('td')[34]     
+        weight = int(weight_cell.get_text(strip=True))
+
+        
+        player_info[f"height_1"] = height
+        player_info[f"weight_1"] = weight
+    except:
+        #For Internationals
+        player_class = "INT"
+        player_info[f"height_1"] = None
+        player_info[f"weight_1"] = None
 
     pageList = soup.find("th").find_all("a")[1:]
 
     player_name = pageList[0].find("img")["title"].replace("Bookmark ","")
 
-    team_code = int(pageList[-1].get("href").split("/")[-1])
+    #playerID = int(pageList[-1].get("href").split("/")[-1])
 
-    output_data["Name"] = player_name
-    output_data["Team_ID"] = team_code
-
-    return output_data
+    player_info["Name"] = player_name
+    player_info["Player_ID"] = playerID
 
 
-
-def get_player_info_measureable(playerCode):
-
-    playerURL = f"https://onlinecollegebasketball.org/prospect/{playerCode}/H"
-    page = requests.get(playerURL)
-    soup = BeautifulSoup(page.text, "html.parser")
-
-    fullinfoList = soup.find("table").find_all("tr")
-    for i in range(len(fullinfoList)):
-        if "Age" in fullinfoList[i].text:
-            start_index = i
-        elif "Perimeter Defense" in fullinfoList[i].text:
-            end_index = i + 1
-
-    infoList = fullinfoList[start_index:end_index]
-    player_info = {}
-
-    for i in range(len(infoList)):
-        text = infoList[i].text.strip().replace(" ", "")
-        if i == 1:
-            find_Outside = text.find("O")
-            separated = split_number_and_letter(text[find_Outside:])
+    #Find Class of Player
+    class_check = fullinfoList[1].text
+    #print(class_check)
+    if "High School Freshman" in class_check:
+        player_class = "HSFR"
+    elif "High School Sophomore" in class_check:
+        player_class = "HSSO"
+    elif "High School Junior" in class_check:
+        player_class = "HSJR"
+    elif "High School Senior" in class_check:
+        player_class = "HSSR"
+    elif "International Prospect" in class_check:
+        player_class = "INT-1"
+    elif "Redshirt Freshman" in class_check:
+        if player_class == "INT":
+            player_class = "INT-3"
         else:
-            separated = split_number_and_letter(text)
+            player_class = "Col-2"
+    elif "Redshirt" not in class_check and "Sophomore" in class_check:
+        if player_class == "INT":
+            player_class = "INT-3"
+        else:
+            player_class = "Col-2"
+    elif "Freshman" in class_check:
+        if player_class == "INT":
+            player_class = "INT-2"
+        else:
+            player_class = "Col-1"
+    else:
+        #Use current measurables 
+        player_class = "OLDER"
 
-        if separated:
-            
 
-            if 'Height' in separated[0]:
-                separated = separated[-4:]
-            if 'Wingspan' in separated[0]:
-                separated = separated[-4:]
-            if 'Vertical' in separated[0]:
-                separated = separated[-4:]
-            
-            # Handle special cases
-            if 'Weight' in separated[0]:
-                player_info['Weight'] = float(f"{separated[1]}")
-                
-                start_idx = 2
-                separated[start_idx] = separated[start_idx].replace("lbs.","")
-
-            else:
-                start_idx = 0
-
-            # Add remaining key-value pairs to the dictionary
-            for j in range(start_idx, len(separated), 2):
-                key = separated[j].replace(":", "")
-                if j + 1 < len(separated):
-                    value = separated[j + 1]
-                    player_info[key] = int(value)
-
-    player_info["Height"] = convert_to_inches(extract_length(split_number_and_letter(infoList[2].text.strip().replace(" ", ""))))
-    player_info["Wingspan"] = convert_to_inches(extract_length(split_number_and_letter(infoList[4].text.strip().replace(" ", ""))))
-    player_info["Vertical"] = Vert_convert_to_inches(extract_length(split_number_and_letter(infoList[5].text.strip().replace(" ", ""))))
-
-    #Get Freshman Height and Weight
-    soup2 = BeautifulSoup(page.text, "html.parser")
-
-    try:
-
-        table = soup.find("table", class_="stats-table-medium_font")
-        rows = table.find_all('tr')
-
-        fresh_height = convert_to_inches((rows[1].find_all('td')[33]).text)
-
-        # For getting Freshman Weight
-        weight_cell = rows[1].find_all('td')[34]     
-        fresh_weight = int(weight_cell.get_text(strip=True))
-
-        
-        player_info["Fresh_Height"] = fresh_height
-        player_info["Fresh_Weight"] = fresh_weight
-    except:
-        player_info["Fresh_Height"] = None
-        player_info["Fresh_Weight"] = None
     
-    return transform_player_data(player_info,playerURL,soup)
+    player_info["Class"] = player_class
+    
 
 
 
-#print(get_player_info_measureable(237714))
+    return player_info
 
+
+'''
+player_data = get_player_info_measureable(241946)
+print("Player Data:", player_data)
+
+'''
+#print(get_player_info_measureable(232458))
