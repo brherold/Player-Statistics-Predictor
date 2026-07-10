@@ -2,6 +2,7 @@ import pandas as pd
 from collections import defaultdict
 
 
+#Player Stat Distributions (no pRAPM)
 def build_stat_player_distributions(
     csv_path,
     stats,
@@ -77,7 +78,52 @@ player_distributions = build_stat_player_distributions(
 #print(player_distributions['FT_P'])
 '''
 
+#pRAPM Player Distribution
+def build_pRAPM_distribution(
+    csv_path
+):
+    """
+    Builds stat distributions by (position, stat).
 
+    Returns:
+        dict[(position, stat)] -> sorted list of values
+    """
+
+    df = pd.read_csv(csv_path)
+    
+    distributions = defaultdict(list)
+
+
+    values = df["pRAPM"].dropna().tolist()
+
+    if values:
+        values.sort()
+        distributions["pRAPM"] = values
+
+    return distributions
+
+'''
+
+df_name = "DataCSVS/50-51-52-pRAPM.csv"
+
+df = pd.read_csv(df_name)
+
+#print(df.columns.tolist())
+
+stats = ['pRAPM']
+
+player_distributions = build_pRAPM_distribution(
+    csv_path=df_name,
+)
+
+
+print(player_distributions['pRAPM'])
+
+
+'''
+
+
+#Team Stat Distributions 
 def build_stat_team_distributions(
     csv_path,
     stats

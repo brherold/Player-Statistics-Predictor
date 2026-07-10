@@ -2,6 +2,7 @@
 from bs4 import BeautifulSoup
 import requests
 from .predictEPM import *
+from .predictpRAPM import * 
 from tabulate import tabulate
 from .StatDistributionGetter import *
 import numpy as np
@@ -18,6 +19,11 @@ player_distributions = build_stat_player_distributions(
     csv_path= player_df,
     stats=player_column_stats
 )
+
+pRAPM_distributions = build_pRAPM_distribution(
+    csv_path="DataCSVS/50-51-52-pRAPM.csv"
+)
+
 ##
 team_df = "DataCSVS/44-45-46-teamAvg.csv"
 team_column_stats = ['eFG_P', 'FT_P', '_2P_P', '_3P_P','Pace', '_3PAr','FTr', 'TO_P', 'ORB_P', 'DRB_P', 
@@ -66,6 +72,7 @@ def get_team_player_stats(team_stat_html):
 
     
     soup = BeautifulSoup(team_stat_html, "html.parser")
+    
     
     header_text = soup.find("h1").text #good enough to just show
 
@@ -129,8 +136,22 @@ def get_team_player_stats(team_stat_html):
     team_PF = float(team[25].text)
     team_FD = float(team[27].text)
 
+    
+
+    if "+" in team[30].text:
+        
+        team_PLUS = float(team[30].text.replace("+",""))
+        
+    else:
+        team_PLUS = float(team[30].text)
+
+
     #Possessions
     team_Poss = team_FG_A - team_Off + team_TO + .48*(team_FT_A) #Will make Opp_Poss same too
+
+    team_PLUS_per_Poss = team_PLUS / team_Poss if team_Poss != 0 else 0
+
+
     
 
     opponent_stats_thead = table.find_all("thead")[-1]
@@ -446,6 +467,15 @@ def get_team_player_stats(team_stat_html):
         player_TO = float(player.find_all("td")[24].text)
         player_PF = float(player.find_all("td")[25].text)
         player_FD = float(player.find_all("td")[27].text)
+
+        
+
+        if "+" in player.find_all("td")[30].text:
+            player_PLUS = float(player.find_all("td")[30].text.replace("+",""))
+        else:
+            player_PLUS = float(player.find_all("td")[30].text)
+
+        
         
         ###    
 
@@ -468,6 +498,10 @@ def get_team_player_stats(team_stat_html):
         
 
         player_Poss = float( team_Poss * player_Min/ team_Min)
+
+        player_PLUS_per_Poss = player_PLUS / player_Poss if player_Poss != 0 else "None"
+
+
         
         
         
@@ -497,6 +531,9 @@ def get_team_player_stats(team_stat_html):
             for a, b, c, d, e in zip(PG_epm, SG_epm, SF_epm, PF_epm, C_epm)
         )
 
+    
+        
+        pRAPM = predict_pRAPM(result_epm[-1],player_PLUS_per_Poss,team_PLUS_per_Poss)
 
         weights = {
             "PG": pg_weight,
@@ -563,6 +600,7 @@ def get_team_player_stats(team_stat_html):
         player_dic["DPM"] = {"value": player_DPM ,"percentile": get_percentile(player_DPM, player_distributions[(max_Position, "DEPM")]),"color": percentile_to_rgb(get_percentile(player_DPM, player_distributions[(max_Position, "DEPM")]))}
         player_dic["EPM"] = {"value": player_EPM ,"percentile": get_percentile(player_EPM, player_distributions[(max_Position, "EPM")]),"color": percentile_to_rgb(get_percentile(player_EPM, player_distributions[(max_Position, "EPM")]))}
         player_dic["VORP"] = VORP_EPM
+        player_dic["pRAPM"] = {"value": pRAPM ,"percentile": get_percentile(pRAPM,pRAPM_distributions["pRAPM"]),"color": percentile_to_rgb(get_percentile(pRAPM,pRAPM_distributions["pRAPM"]))}
         player_dic["PTS_per56"] = {"value": player_PTS_per56 ,"percentile": get_percentile(player_PTS_per56, player_distributions[(max_Position, "PTS")]),"color": percentile_to_rgb(get_percentile(player_PTS_per56, player_distributions[(max_Position, "PTS")]))}
         player_dic["TS"] = {"value": player_TS ,"percentile": get_percentile(player_TS, player_distributions[(max_Position, "TS")]),"color": percentile_to_rgb(get_percentile(player_TS, player_distributions[(max_Position, "TS")]))}
         
@@ -601,4 +639,18 @@ def get_team_player_stats(team_stat_html):
 
     return 
 
-#get_team_player_stats(409 ,2049,"C") 
+
+
+'''
+#For Testing
+
+file_name = "scripts\\TeamEPMContent\\533-2053.htm"
+file = open(file_name, "r", encoding="utf-8", errors="ignore")
+
+with open(file_name, "rb") as file:
+    team_stat_html = file.read().decode("utf-8", errors="ignore")
+
+get_team_player_stats(team_stat_html) 
+'''
+
+#python -m scripts.TeamEPMContent.getTeamPlayerStatsFlask
