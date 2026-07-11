@@ -449,11 +449,16 @@
             <th class="sortable" onclick="sortTable(2)">GS</th>
             <th class="sortable" onclick="sortTable(3)">GP</th>
             <th class="sortable" onclick="sortTable(4)">Min</th>
-            <th class="sortable" onclick="sortTable(5)" title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">OPM</th>
-            <th class="sortable" onclick="sortTable(6)" title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">DPM</th>
-            <th class="sortable" onclick="sortTable(7)" title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player using box score stats.">EPM</th>
-            <th class="sortable" onclick="sortTable(8)" title="Value Over Replacement Player: Cumulative version of EPM using Min and GP">VORP</th>
-            <th class="sortable" onclick="sortTable(9)" title="Predicted RAPM: A measure of a player's impact per 100 possessions above the average player (Using EPM and Plus Minus Data).">pRAPM</th>
+            <th class="sortable" onclick="sortTable(5)" title="Offensive Plus-Minus: An estimate of a player's offensive impact per 100 possessions above league average, predicted from box score statistics.">OPM</th>
+
+            <th class="sortable" onclick="sortTable(6)" title="Defensive Plus-Minus: An estimate of a player's defensive impact per 100 possessions above league average, predicted from box score statistics.">DPM</th>
+
+            <th class="sortable" onclick="sortTable(7)" title="Estimated Plus-Minus: An estimate of a player's overall impact per 100 possessions above league average, predicted from box score statistics.">EPM</th>
+            
+            <th class="sortable" onclick="sortTable(8)" title="Value Over Replacement Player: Estimates a player's total value above a replacement-level player over the course of a season, based on EPM, minutes played, and games played.">VORP</th>
+            
+            <th class="sortable" onclick="sortTable(9)" title="Predicted RAPM: An estimate of Regularized Adjusted Plus-Minus (RAPM), which measures a player's impact per 100 possessions above league average, predicted from EPM and plus-minus data.">pRAPM</th>
+            
             <th class="sortable" onclick="sortTable(10)" title="PTS per 56 Possessions">PTS / 56</th>
             <th class="sortable" onclick="sortTable(11)"
                 title="True Shooting Percentage: A measure of shooting efficiency that accounts for field goals, three-point field goals, and free throws.">
