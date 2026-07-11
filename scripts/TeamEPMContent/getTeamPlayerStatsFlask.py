@@ -20,8 +20,10 @@ player_distributions = build_stat_player_distributions(
     stats=player_column_stats
 )
 
+#All-pRAPM uses pRAPM_adj (adjusts for playing time)
+
 pRAPM_distributions = build_pRAPM_distribution(
-    csv_path="DataCSVS/50-51-52-pRAPM.csv"
+    csv_path="DataCSVS/50-51-52-All-pRAPM.csv"
 )
 
 ##
@@ -501,6 +503,7 @@ def get_team_player_stats(team_stat_html):
 
         player_PLUS_per_Poss = player_PLUS / player_Poss if player_Poss != 0 else "None"
 
+        player_poss_pct_played = (player_Poss * player_GP) / (team_Poss * team_GP) if (team_Poss * team_GP) != 0 else 0
 
         
         
@@ -533,7 +536,7 @@ def get_team_player_stats(team_stat_html):
 
     
         
-        pRAPM = predict_pRAPM(result_epm[-1],player_PLUS_per_Poss,team_PLUS_per_Poss)
+        pRAPM = predict_pRAPM(result_epm[-1],player_PLUS_per_Poss,team_PLUS_per_Poss, player_poss_pct_played)
 
         weights = {
             "PG": pg_weight,
