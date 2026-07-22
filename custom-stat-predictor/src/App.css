@@ -1,0 +1,118 @@
+body {
+  background-color: #e8eefe;
+  font-family: Arial, sans-serif;
+}
+
+.stat-table {
+  margin: 2rem auto;
+  max-width: 1100px;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  margin-left: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 0.5rem;
+}
+
+td {
+  padding: 0.5rem;
+  vertical-align: middle;
+}
+
+.skill-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 300px; /* or adjust for your layout */
+}
+
+.skill-input label {
+  flex: 0 0 140px; /* fixed width */
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right; /* right-align text */
+  direction: rtl; /* text direction right to left */
+  unicode-bidi: plaintext; /* keep character order normal */
+  padding-left: 8px; /* space from left (now "start" side) */
+  display: block;
+}
+
+.block-bar {
+  flex: 1 1 auto; /* grow and shrink to fill available space */
+  height: 12px;
+  border: 1px solid #00008b;
+  background-color: black;
+  padding: 1px;
+  display: flex;
+  gap: 1px;
+  max-width: 180px; /* max width to keep consistent size */
+  min-width: 100px; /* minimum so it doesn't shrink too small */
+}
+
+.block {
+  flex: 1;
+  background-color: transparent;
+}
+
+.block.filled.blue {
+  background-color: blue;
+}
+
+.block.filled.purple {
+  background-color: purple;
+}
+
+.fill {
+  height: 100%;
+  background: repeating-linear-gradient(
+    to right,
+    #00008b,
+    #00008b 4px,
+    #8b0000 4px,
+    #8b0000 8px
+  );
+}
+
+input[type="number"] {
+  flex: 0 0 50px; /* fixed width */
+  padding: 2px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: right; /* RIGHT align input number */
+  font-size: 0.9rem;
+  background-color: #25262a;
+}
+
+.position-label {
+  font-size: 1.2em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--fg-light);
+  text-align: center;
+  margin-top: 20px;
+}
+
+
+/* Chrome, Safari, Edge */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+  padding-right: 20px;
+}
