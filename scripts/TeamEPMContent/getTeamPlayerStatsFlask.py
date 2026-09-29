@@ -22,7 +22,7 @@ player_distributions = build_stat_player_distributions(
 )
 
 ##
-team_df = "DataCSVS/44-45-46-teamAvg.csv"
+team_df = "DataCSVS/50-51-52-53-team_avg.csv"
 team_column_stats = ['eFG_P', 'FT_P', '_2P_P', '_3P_P','Pace', '_3PAr','FTr', 'TO_P', 'ORB_P', 'DRB_P', 
          'Pace', 'PITP%','ORtg', 'NetRtg']
 

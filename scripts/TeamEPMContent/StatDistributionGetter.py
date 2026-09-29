@@ -150,6 +150,10 @@ def build_stat_team_distributions(
     df = pd.read_csv(csv_path)
 
     # Basic eligibility filtering
+    if "Pace" not in df.columns and "FG_A" in df.columns and "Off" in df.columns and "TO" in df.columns and "FT_A" in df.columns:
+        df["Pace"] = df["FG_A"] - df["Off"] + df["TO"] + 0.48 * df["FT_A"]
+    if "PITP%" not in df.columns and "PITP" in df.columns and "PTS" in df.columns:
+        df["PITP%"] = (df["PITP"] / df["PTS"]).round(3)
 
     distributions = defaultdict(list)
 
