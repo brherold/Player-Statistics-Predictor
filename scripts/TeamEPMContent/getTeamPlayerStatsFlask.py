@@ -1,8 +1,7 @@
 #DONT USE .44 when calculating possessions or true shooting USE .48 (similar to KenPom .475)
 from bs4 import BeautifulSoup
 import requests
-from .predictEPM import *
-from .predictpRAPM import * 
+from .predictbRAPM import predict_brapm_dict
 from tabulate import tabulate
 from .StatDistributionGetter import *
 import numpy as np
@@ -10,20 +9,16 @@ import numpy as np
 
 
 
-player_df = "DataCSVS/44-45-46-per56.csv"
-player_column_stats = ['Primary_Position','PTS', 'O_eFG_P','OEPM', 'DEPM', 'EPM', 'TS', 
+player_df = "DataCSVS/50-51-52-53-player-bRAPM.csv"
+player_column_stats = ['Primary_Position','PTS', 'O_eFG_P', 'bORAPM', 'bDRAPM', 'bRAPM', 'TS', 
          '_3PAr', 'FTr', 'ORB_P', 'DRB_P', 'TRB_P', 'AST_P', 'STL_P', 
-         'BLK_P', 'TO_P', 'USG_P', '_2P_P', '_3P_P', 'FT_P']
+         'BLK_P', 'TO_P', 'USG_P', '_2P_P', '_3P_P', 'FT_P', 'PF_per_56']
 
 player_distributions = build_stat_player_distributions(
-    csv_path= player_df,
-    stats=player_column_stats
-)
-
-#All-pRAPM uses pRAPM_adj (adjusts for playing time)
-
-pRAPM_distributions = build_pRAPM_distribution(
-    csv_path="DataCSVS/50-51-52-All-pRAPM.csv"
+    csv_path=player_df,
+    stats=player_column_stats,
+    min_gp=30,
+    min_min=8
 )
 
 ##
@@ -105,12 +100,12 @@ def get_team_player_stats(team_stat_html):
     team_shots_split = team[6].get("title").replace("\n"," ").split(" ")
     
 
-    team_FG_M , team_FG_A = map(int,team_shots_split[3].strip("()").split("-"))
+    team_FG_M , team_FG_A = map(int,team_shots_split[3].strip("()\r\n\t ").split("-"))
 
     team_FG_M = float(team_FG_M / team_GP)
     team_FG_A = float(team_FG_A / team_GP)
 
-    team_3P_M , team_3P_A = map(int,team_shots_split[11].strip("()").split("-"))
+    team_3P_M , team_3P_A = map(int,team_shots_split[11].strip("()\r\n\t ").split("-"))
 
     team_3P_M = float(team_3P_M / team_GP)
     team_3P_A = float(team_3P_A / team_GP)
@@ -120,7 +115,7 @@ def get_team_player_stats(team_stat_html):
     
     team_FT_split = team[12].get("title").split(" ")
 
-    team_FT_M, team_FT_A = map(int,team_FT_split[-1].strip("()").split("-"))
+    team_FT_M, team_FT_A = map(int,team_FT_split[-1].strip("()\r\n\t ").split("-"))
 
     team_FT_M = float(team_FT_M / team_GP)
     team_FT_A = float(team_FT_A / team_GP)
@@ -165,13 +160,13 @@ def get_team_player_stats(team_stat_html):
 
     opp_shots_split = opponent[6].get("title").replace("\n"," ").split(" ")
 
-    opp_FG_M , opp_FG_A = map(int,opp_shots_split[3].strip("()").split("-"))
+    opp_FG_M , opp_FG_A = map(int,opp_shots_split[3].strip("()\r\n\t ").split("-"))
 
     opp_FG_M = float(opp_FG_M / team_GP)
     opp_FG_A = float(opp_FG_A / team_GP)
     
     
-    opp_3P_M , opp_3P_A = map(int,opp_shots_split[11].strip("()").split("-"))
+    opp_3P_M , opp_3P_A = map(int,opp_shots_split[11].strip("()\r\n\t ").split("-"))
     
 
     opp_3P_M = float(opp_3P_M / team_GP)
@@ -182,7 +177,7 @@ def get_team_player_stats(team_stat_html):
     
     opp_FT_split = opponent[12].get("title").split(" ")
 
-    opp_FT_M, opp_FT_A = map(int,opp_FT_split[-1].strip("()").split("-"))
+    opp_FT_M, opp_FT_A = map(int,opp_FT_split[-1].strip("()\r\n\t ").split("-"))
 
     opp_FT_M = float(opp_FT_M / team_GP)
     opp_FT_A = float(opp_FT_A / team_GP)
@@ -387,6 +382,8 @@ def get_team_player_stats(team_stat_html):
     player_stats_result = []
     #####
     
+    brapm_preds = predict_brapm_dict(soup)
+
     for player in player_stats:
    
     #
@@ -428,9 +425,9 @@ def get_team_player_stats(team_stat_html):
 
         player_shots_split = player.find_all("td")[6].get("title").replace("\n"," ").split(" ")
 
-        player_FG_M , player_FG_A = map(int,player_shots_split[3].strip("()").split("-"))
-        player_2P_M , player_2P_A = map(int,player_shots_split[7].strip("()").split("-"))
-        player_3P_M , player_3P_A = map(int,player_shots_split[11].strip("()").split("-"))
+        player_FG_M , player_FG_A = map(int,player_shots_split[3].strip("()\r\n\t ").split("-"))
+        player_2P_M , player_2P_A = map(int,player_shots_split[7].strip("()\r\n\t ").split("-"))
+        player_3P_M , player_3P_A = map(int,player_shots_split[11].strip("()\r\n\t ").split("-"))
 
         
 
@@ -449,7 +446,7 @@ def get_team_player_stats(team_stat_html):
         
         player_FT_split = player.find_all("td")[12].get("title").split(" ")
 
-        player_FT_M, player_FT_A = map(int,player_FT_split[-1].strip("()").split("-"))
+        player_FT_M, player_FT_A = map(int,player_FT_split[-1].strip("()\r\n\t ").split("-"))
 
         player_FT_M = float(player_FT_M / player_GP)
 
@@ -483,9 +480,9 @@ def get_team_player_stats(team_stat_html):
 
         player_opp_shots_split = player.find_all("td")[23].get("title").replace("\n"," ").split(" ")
 
-        player_O_FG_M , player_O_FG_A = map(int,player_opp_shots_split[3].strip("()").split("-"))
-        player_O_2P_M , _ = map(int,player_opp_shots_split[7].strip("()").split("-"))
-        player_O_3P_M , _ = map(int,player_opp_shots_split[11].strip("()").split("-"))
+        player_O_FG_M , player_O_FG_A = map(int,player_opp_shots_split[3].strip("()\r\n\t ").split("-"))
+        player_O_2P_M , _ = map(int,player_opp_shots_split[7].strip("()\r\n\t ").split("-"))
+        player_O_3P_M , _ = map(int,player_opp_shots_split[11].strip("()\r\n\t ").split("-"))
 
        
         player_O_FG_M = float(player_O_FG_M / player_GP)
@@ -510,33 +507,7 @@ def get_team_player_stats(team_stat_html):
         
         
 
-        player_off_values_epm = [player_FG_A, player_2P_M, player_3P_M, player_FT_M, player_Ast, player_TO, player_Off]
-        player_def_values_epm = [player_O_FG_A, player_O_2P_M, player_O_3P_M, player_Stl, player_PF, player_Def]
-        
-        player_off_values_bpm= [player_PTS, player_FG_A, player_FT_A, player_Off, player_Ast, player_TO, player_FD]
-        player_def_values_bpm = [player_O_PTS, player_O_FG_A, player_Def, player_Stl, player_PF]
-        #print(predict_epm("SG",player_Poss, player_Poss, player_off_values_epm,player_def_values_epm))
-        
-
-        PG_epm = predict_epm("PG",player_Poss, player_Poss, player_off_values_epm, player_def_values_epm)
-        SG_epm = predict_epm("SG",player_Poss, player_Poss, player_off_values_epm,player_def_values_epm)
-        SF_epm = predict_epm("SF",player_Poss, player_Poss, player_off_values_epm,player_def_values_epm)
-        PF_epm = predict_epm("PF",player_Poss, player_Poss, player_off_values_epm,player_def_values_epm)
-        C_epm = predict_epm("C",player_Poss, player_Poss, player_off_values_epm,player_def_values_epm)
-
-        
-
         pg_weight, sg_weight, sf_weight, pf_weight, c_weight = player_Min_PG/player_Min, player_Min_SG/player_Min, player_Min_SF/player_Min, player_Min_PF/player_Min, player_Min_C/player_Min  
-
-    
-        result_epm = tuple(
-            round(a*pg_weight + b*sg_weight + c*sf_weight + d*pf_weight + e*c_weight, 1)
-            for a, b, c, d, e in zip(PG_epm, SG_epm, SF_epm, PF_epm, C_epm)
-        )
-
-    
-        
-        pRAPM = predict_pRAPM(result_epm[-1],player_PLUS_per_Poss,team_PLUS_per_Poss, player_poss_pct_played)
 
         weights = {
             "PG": pg_weight,
@@ -547,10 +518,13 @@ def get_team_player_stats(team_stat_html):
         }
 
         max_Position = max(weights, key=weights.get)
- 
-        #print(player_name, max_Position, player_GP, player_Min, result)
 
-        VORP_EPM = round((result_epm[-1] + 3) * (player_Min / (team_Min)) * (player_GP / team_GP),1)
+        # Get bRAPM predictions for player
+        pid_int = int(player_id) if player_id and str(player_id).isdigit() else None
+        brapm_data = brapm_preds.get(pid_int) or brapm_preds.get(player_name, {})
+        player_bORAPM = brapm_data.get("bORAPM", 0.0)
+        player_bDRAPM = brapm_data.get("bDRAPM", 0.0)
+        player_bRAPM = brapm_data.get("bRAPM", 0.0)
 
         #Advanced Statistics
         player_TS = round((player_PTS) / (2 *(player_FG_A + .44 * player_FT_A)), 3) if (player_FG_A + .44 * player_FT_A) != 0 else " - "
@@ -583,14 +557,7 @@ def get_team_player_stats(team_stat_html):
 
 
         player_PTS_per56 = round(float(player_PTS / player_Poss) * 56,1)
-
-
-        #VORP_for_EW = round((result[-1] + 3) * (player_Min / (team_Min * 5)) * (player_GP / team_GP),3)
-        #EW = round(VORP_for_EW * .0484 * (team_GP),3)
-        
-        player_OPM = result_epm[0]
-        player_DPM = result_epm[1]
-        player_EPM = result_epm[2]
+        player_PF_per56 = round(float(player_PF / player_Poss) * 56, 1) if player_Poss != 0 else 0.0
 
         player_dic = {}   
         player_dic["Name"] = player_name
@@ -599,12 +566,16 @@ def get_team_player_stats(team_stat_html):
         player_dic["GS"] = player_GS
         player_dic["GP"] = player_GP
         player_dic["Min"] = player_Min
-        player_dic["OPM"] = {"value": player_OPM ,"percentile": get_percentile(player_OPM, player_distributions[(max_Position, "OEPM")]),"color": percentile_to_rgb(get_percentile(player_OPM, player_distributions[(max_Position, "OEPM")]))}
-        player_dic["DPM"] = {"value": player_DPM ,"percentile": get_percentile(player_DPM, player_distributions[(max_Position, "DEPM")]),"color": percentile_to_rgb(get_percentile(player_DPM, player_distributions[(max_Position, "DEPM")]))}
-        player_dic["EPM"] = {"value": player_EPM ,"percentile": get_percentile(player_EPM, player_distributions[(max_Position, "EPM")]),"color": percentile_to_rgb(get_percentile(player_EPM, player_distributions[(max_Position, "EPM")]))}
-        player_dic["VORP"] = VORP_EPM
-        player_dic["pRAPM"] = {"value": pRAPM ,"percentile": get_percentile(pRAPM,pRAPM_distributions["pRAPM"]),"color": percentile_to_rgb(get_percentile(pRAPM,pRAPM_distributions["pRAPM"]))}
+        player_dic["Off"] = {"value": player_bORAPM, "percentile": get_percentile(player_bORAPM, player_distributions[(max_Position, "bORAPM")]), "color": percentile_to_rgb(get_percentile(player_bORAPM, player_distributions[(max_Position, "bORAPM")]))}
+        player_dic["Def"] = {"value": player_bDRAPM, "percentile": get_percentile(player_bDRAPM, player_distributions[(max_Position, "bDRAPM")]), "color": percentile_to_rgb(get_percentile(player_bDRAPM, player_distributions[(max_Position, "bDRAPM")]))}
+        player_dic["bRAPM"] = {"value": player_bRAPM, "percentile": get_percentile(player_bRAPM, player_distributions[(max_Position, "bRAPM")]), "color": percentile_to_rgb(get_percentile(player_bRAPM, player_distributions[(max_Position, "bRAPM")]))}
+        player_dic["bORAPM"] = player_dic["Off"]
+        player_dic["bDRAPM"] = player_dic["Def"]
+        player_dic["OPM"] = player_dic["Off"]
+        player_dic["DPM"] = player_dic["Def"]
+        player_dic["EPM"] = player_dic["bRAPM"]
         player_dic["PTS_per56"] = {"value": player_PTS_per56 ,"percentile": get_percentile(player_PTS_per56, player_distributions[(max_Position, "PTS")]),"color": percentile_to_rgb(get_percentile(player_PTS_per56, player_distributions[(max_Position, "PTS")]))}
+        player_dic["PF_per56"] = {"value": player_PF_per56, "percentile": lower_is_better(get_percentile(player_PF_per56, player_distributions[(max_Position, "PF_per_56")])), "color": percentile_to_rgb(lower_is_better(get_percentile(player_PF_per56, player_distributions[(max_Position, "PF_per_56")])))}
         player_dic["TS"] = {"value": player_TS ,"percentile": get_percentile(player_TS, player_distributions[(max_Position, "TS")]),"color": percentile_to_rgb(get_percentile(player_TS, player_distributions[(max_Position, "TS")]))}
         
         player_dic["Two_P"] = {"value": player_2P_P ,"percentile": get_percentile(player_2P_P, player_distributions[(max_Position, "_2P_P")]),"color": percentile_to_rgb(get_percentile(player_2P_P, player_distributions[(max_Position, "_2P_P")]))}

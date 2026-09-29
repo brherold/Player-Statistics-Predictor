@@ -7,6 +7,8 @@ def build_stat_player_distributions(
     csv_path,
     stats,
     positions=("PG", "SG", "SF", "PF", "C"),
+    min_gp=30,
+    min_min=8,
 ):
     """
     Builds stat distributions by (position, stat).
@@ -18,6 +20,16 @@ def build_stat_player_distributions(
     df = pd.read_csv(csv_path)
 
     # Basic eligibility filtering
+    if min_gp is not None and "GP" in df.columns:
+        df = df[df["GP"] >= min_gp]
+    if min_min is not None and "Min" in df.columns:
+        df = df[df["Min"] >= min_min]
+
+    if "primary_position" in df.columns and "Primary_Position" not in df.columns:
+        df = df.rename(columns={"primary_position": "Primary_Position"})
+    if "TS_pavg" in df.columns:
+        df["TS"] = df["TS_pavg"]
+
     df = df[
         (df["Primary_Position"].isin(positions))
     ]
