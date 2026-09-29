@@ -173,13 +173,40 @@ def flask_get_player_info(player_html_link, from_file=False):
             for j in range(start_idx, len(separated), 2):
                 key = separated[j].replace(":", "")
                 if j + 1 < len(separated):
-                    value = separated[j + 1]
-                    player_info[key] = int(value)
+                    val_str = separated[j + 1]
+                    if val_str.isdigit():
+                        player_info[key] = int(val_str)
 
     # Additional conversions
-    player_info["Height_inches"] = convert_to_inches(extract_length(split_number_and_letter(infoList[2].text.strip().replace(" ", ""))))
-    player_info["Wingspan_inches"] = convert_to_inches(extract_length(split_number_and_letter(infoList[4].text.strip().replace(" ", ""))))
-    player_info["Vertical_float"] = Vert_convert_to_inches(extract_length(split_number_and_letter(infoList[5].text.strip().replace(" ", ""))))
+    def parse_height_robust(s):
+        m = re.search(r"(\d+)\s*'\s*([\d¼½\./]+)?", s)
+        if not m:
+            return 0.0
+        feet = int(m.group(1))
+        inches_str = (m.group(2) or "0").replace('½', '.5').replace('¼', '.25').replace('"', '').strip()
+        try:
+            inches = float(inches_str)
+        except Exception:
+            inches = 0.0
+        return float(feet * 12 + inches)
+
+    def parse_vert_robust(s):
+        m = re.search(r"(\d+(?:\.\d+|[¼½])?)\s*\"?", s)
+        if not m:
+            return 0.0
+        v = m.group(1).replace('½', '.5').replace('¼', '.25').strip()
+        try:
+            return float(v)
+        except Exception:
+            return 0.0
+
+    h_str = infoList[2].text if len(infoList) > 2 else ""
+    w_str = infoList[4].text if len(infoList) > 4 else ""
+    v_str = infoList[5].text if len(infoList) > 5 else ""
+
+    player_info["Height_inches"] = parse_height_robust(h_str)
+    player_info["Wingspan_inches"] = parse_height_robust(w_str)
+    player_info["Vertical_float"] = parse_vert_robust(v_str)
 
     # Get Player Name
     name_soup = soup.find("h1")
