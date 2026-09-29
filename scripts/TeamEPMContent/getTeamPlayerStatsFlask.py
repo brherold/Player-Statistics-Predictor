@@ -1,4 +1,6 @@
 #DONT USE .44 when calculating possessions or true shooting USE .48 (similar to KenPom .475)
+import os
+import joblib
 from bs4 import BeautifulSoup
 import requests
 from .predictbRAPM import predict_brapm_dict
@@ -6,30 +8,34 @@ from tabulate import tabulate
 from .StatDistributionGetter import *
 import numpy as np
 
-
-
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
+CACHE_FILE = os.path.join(PROJECT_ROOT, "models", "cached_distributions.joblib")
 
 player_df = "DataCSVS/50-51-52-53-player-bRAPM.csv"
 player_column_stats = ['Primary_Position','PTS', 'O_eFG_P', 'bORAPM', 'bDRAPM', 'bRAPM', 'TS', 
          '_3PAr', 'FTr', 'ORB_P', 'DRB_P', 'TRB_P', 'AST_P', 'STL_P', 
          'BLK_P', 'TO_P', 'USG_P', '_2P_P', '_3P_P', 'FT_P', 'PF_per_56']
 
-player_distributions = build_stat_player_distributions(
-    csv_path=player_df,
-    stats=player_column_stats,
-    min_gp=30,
-    min_min=8
-)
-
-##
 team_df = "DataCSVS/50-51-52-53-team_avg.csv"
 team_column_stats = ['eFG_P', 'FT_P', '_2P_P', '_3P_P','Pace', '_3PAr','FTr', 'TO_P', 'ORB_P', 'DRB_P', 
          'Pace', 'PITP%','ORtg', 'NetRtg']
 
-team_distributions = build_stat_team_distributions(
-    csv_path= team_df,
-    stats=team_column_stats
-)
+if os.path.exists(CACHE_FILE):
+    _cached_bundle = joblib.load(CACHE_FILE)
+    player_distributions = _cached_bundle["player"]
+    team_distributions = _cached_bundle["team"]
+else:
+    player_distributions = build_stat_player_distributions(
+        csv_path=player_df,
+        stats=player_column_stats,
+        min_gp=30,
+        min_min=8
+    )
+    team_distributions = build_stat_team_distributions(
+        csv_path=team_df,
+        stats=team_column_stats
+    )
 
 def get_percentile(value, sorted_values):
     if len(sorted_values) == 0:
