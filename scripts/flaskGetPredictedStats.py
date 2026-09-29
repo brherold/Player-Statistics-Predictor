@@ -5,6 +5,20 @@ from scripts.pygetPlayerSkills import flask_get_player_info
 
 import joblib
 
+# Fix backwards compatibility when unpickling DataFrames pickled with different pandas/StringDtype versions
+try:
+    from pandas.core.arrays.string_ import StringDtype
+    _orig_string_dtype_init = StringDtype.__init__
+
+    def _safe_string_dtype_init(self, *args, **kwargs):
+        if len(args) > 2:
+            args = args[:2]
+        return _orig_string_dtype_init(self, *args, **kwargs)
+
+    StringDtype.__init__ = _safe_string_dtype_init
+except Exception:
+    pass
+
 RAPM_MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "positional_rapm_models.joblib")
 _rapm_bundle = None
 
