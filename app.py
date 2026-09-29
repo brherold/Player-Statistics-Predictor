@@ -102,6 +102,8 @@ def home():
                 return render_template("error.html", error="Please provide a URL or upload a file")
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return render_template("error.html", error=str(e))
 
     return render_template("home.html")
