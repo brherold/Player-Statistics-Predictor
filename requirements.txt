@@ -94,3 +94,5 @@ Werkzeug==3.0.4
 wsproto==1.2.0
 yarl==1.14.0
 lightgbm
+pyarrow
+fastparquet
