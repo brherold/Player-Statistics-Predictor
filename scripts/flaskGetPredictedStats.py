@@ -1,7 +1,19 @@
+import os
 import pandas as pd
+import numpy as np
 from scripts.pygetPlayerSkills import flask_get_player_info
 
 import joblib
+
+RAPM_MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "positional_rapm_models.joblib")
+_rapm_bundle = None
+
+def get_rapm_bundle():
+    global _rapm_bundle
+    if _rapm_bundle is None:
+        _rapm_bundle = joblib.load(RAPM_MODEL_PATH)
+    return _rapm_bundle
+
 
 
 def percentile_to_rgb(percentile):
@@ -43,17 +55,25 @@ def preprocess_and_predict(df, player_df, scaler, pca, model, expected_columns, 
         
     # 1. Predict for all players in df
     X_all = df[expected_columns].copy()
+    X = player_df[expected_columns].copy()
 
-    # Scale and transform
-    X_scaled_all = scaler.transform(X_all)
-    X_pca_all = pca.transform(X_scaled_all)
+    # Scale and transform if scaler and pca provided, else pass raw features
+    if scaler is not None:
+        X_scaled_all = scaler.transform(X_all)
+        X_scaled = scaler.transform(X)
+    else:
+        X_scaled_all = X_all.values
+        X_scaled = X.values
+
+    if pca is not None:
+        X_pca_all = pca.transform(X_scaled_all)
+        X_pca = pca.transform(X_scaled)
+    else:
+        X_pca_all = X_scaled_all
+        X_pca = X_scaled
+
     preds_all = model.predict(X_pca_all)
-    
-
-    X = player_df[expected_columns]
-    X_scaled = scaler.transform(X)
-    X_pca = pca.transform(X_scaled)
-    prediction = model.predict(X_pca)[0]
+    prediction = float(model.predict(X_pca)[0])
 
 
     # If negatives aren't allowed, clip prediction at 0
@@ -134,116 +154,132 @@ def givePlayerStats(player_html_link,position, from_file=False):
 
 
     # Load models and their components
-    fin_scaler, fin_pca, fin_model, fin_expected_columns, fin_avg_pred, df= load_model_components("FIN")
-    is_scaler, is_pca, is_model, is_expected_columns, is_avg_pred , df= load_model_components(f"IS_{position_group}")
-    mr_scaler, mr_pca, mr_model, mr_expected_columns, mr_avg_pred, df = load_model_components("MR")
-    tp_scaler, tp_pca, tp_model, tp_expected_columns, tp_avg_pred , df= load_model_components("3P")
-    ft_scaler, ft_pca, ft_model, ft_expected_columns, ft_avg_pred , df= load_model_components("FT")
-    rebp_scaler, rebp_pca, rebp_model, rebp_expected_columns, rebp_avg_pred , df= load_model_components(f"RebP_{position}")
-    ast_scaler, ast_pca, ast_model, ast_expected_columns, ast_avg_pred , df= load_model_components(f"Ast_{position}")
-    stl_scaler, stl_pca, stl_model, stl_expected_columns, stl_avg_pred, df = load_model_components(f"Stl_{position}")
-    blk_scaler, blk_pca, blk_model, blk_expected_columns, blk_avg_pred, df = load_model_components(f"Blk_{position}")
-    twoof_scaler, twoof_pca, twoof_model, twoof_expected_columns, twoof_avg_pred, df = load_model_components(f"2OF%_{position}")
-    threeof_scaler, threeof_pca, threeof_model, threeof_expected_columns, threeof_avg_pred, df = load_model_components(f"3OF%")
-    fd_scaler, fd_pca, fd_model, fd_expected_columns, fd_avg_pred , df= load_model_components(f"FD_{position}")
-    ast_to_scaler, ast_to_pca, ast_to_model, ast_to_expected_columns, ast_to_avg_pred, df = load_model_components(f"AST-TO_{position}")
+    fin_scaler, fin_pca, fin_model, fin_expected_columns, fin_avg_pred, fin_df = load_model_components("FIN")
+    is_scaler, is_pca, is_model, is_expected_columns, is_avg_pred, is_df = load_model_components(f"IS_{position_group}")
+    mr_scaler, mr_pca, mr_model, mr_expected_columns, mr_avg_pred, mr_df = load_model_components("MR")
+    tp_scaler, tp_pca, tp_model, tp_expected_columns, tp_avg_pred, tp_df = load_model_components("3P")
+    ft_scaler, ft_pca, ft_model, ft_expected_columns, ft_avg_pred, ft_df = load_model_components("FT")
 
+    # Positional Rate Stat Models
+    ast_scaler, ast_pca, ast_model, ast_expected_columns, ast_avg_pred, ast_df = load_model_components(f"AST%_{position}")
+    tov_scaler, tov_pca, tov_model, tov_expected_columns, tov_avg_pred, tov_df = load_model_components(f"TOV%_{position}")
+    drb_scaler, drb_pca, drb_model, drb_expected_columns, drb_avg_pred, drb_df = load_model_components(f"DRB%_{position}")
+    stl_scaler, stl_pca, stl_model, stl_expected_columns, stl_avg_pred, stl_df = load_model_components(f"STL%_{position}")
+    blk_scaler, blk_pca, blk_model, blk_expected_columns, blk_avg_pred, blk_df = load_model_components(f"BLK%_{position}")
 
-    opm_plus_scaler, opm_plus_pca, opm_plus_model, opm_plus_expected_columns, opm_plus_avg_pred, df = load_model_components(f"OPM+_{position}")
-    dpm_plus_scaler, dpm_plus_pca, dpm_plus_model, dpm_plus_expected_columns, dpm_plus_avg_pred , df= load_model_components(f"DPM+_{position}")
-    epm_plus_scaler, epm_plus_scaler_pca, epm_plus_scaler_model, epm_plus_scaler_expected_columns, epm_plus_scaler_avg_pred, df = load_model_components(f"EPM+_{position}")
-
-    opm_plus_scaler, opm_plus_pca, opm_plus_model, opm_plus_expected_columns, opm_plus_avg_pred, df = load_model_components(f"OPM+_{position}")
-    dpm_plus_scaler, dpm_plus_pca, dpm_plus_model, dpm_plus_expected_columns, dpm_plus_avg_pred , df= load_model_components(f"DPM+_{position}")
-    epm_plus_scaler, epm_plus_scaler_pca, epm_plus_scaler_model, epm_plus_scaler_expected_columns, epm_plus_scaler_avg_pred, df = load_model_components(f"EPM+_{position}")
-
-
-
+    twoof_scaler, twoof_pca, twoof_model, twoof_expected_columns, twoof_avg_pred, twoof_df = load_model_components(f"2OF%_{position}")
+    threeof_scaler, threeof_pca, threeof_model, threeof_expected_columns, threeof_avg_pred, threeof_df = load_model_components("3OF%")
+    fd_scaler, fd_pca, fd_model, fd_expected_columns, fd_avg_pred, fd_df = load_model_components(f"FD_{position}")
 
     # Dictionary to store all predicted stats
     predicted_player_stats = {}
 
-    
-
-    # Predict and store stats
+    # Predict and store shooting stats
     predicted_player_stats["Fin%"] = format_stat(
-        preprocess_and_predict(df, player_df, fin_scaler, fin_pca, fin_model, fin_expected_columns, fin_avg_pred),
+        preprocess_and_predict(fin_df, player_df, fin_scaler, fin_pca, fin_model, fin_expected_columns, fin_avg_pred),
         percent=True
     )
 
     predicted_player_stats["IS%"] = format_stat(
-        preprocess_and_predict(df, player_df, is_scaler, is_pca, is_model, is_expected_columns, is_avg_pred),
+        preprocess_and_predict(is_df, player_df, is_scaler, is_pca, is_model, is_expected_columns, is_avg_pred),
         percent=True
     )
 
     predicted_player_stats["Mid%"] = format_stat(
-        preprocess_and_predict(df, player_df, mr_scaler, mr_pca, mr_model, mr_expected_columns, mr_avg_pred),
+        preprocess_and_predict(mr_df, player_df, mr_scaler, mr_pca, mr_model, mr_expected_columns, mr_avg_pred),
         percent=True
     )
 
     predicted_player_stats["3PT%"] = format_stat(
-        preprocess_and_predict(df, player_df, tp_scaler, tp_pca, tp_model, tp_expected_columns, tp_avg_pred),
+        preprocess_and_predict(tp_df, player_df, tp_scaler, tp_pca, tp_model, tp_expected_columns, tp_avg_pred),
         percent=True
     )
 
     predicted_player_stats["FT%"] = format_stat(
-        preprocess_and_predict(df, player_df, ft_scaler, ft_pca, ft_model, ft_expected_columns, ft_avg_pred),
+        preprocess_and_predict(ft_df, player_df, ft_scaler, ft_pca, ft_model, ft_expected_columns, ft_avg_pred),
         percent=True
     )
 
-    predicted_player_stats["Reb"] = format_stat(
-        preprocess_and_predict(df, player_df, rebp_scaler, rebp_pca, rebp_model, rebp_expected_columns, rebp_avg_pred)
+    # Predict and store rate stats
+    predicted_player_stats["AST%"] = format_stat(
+        preprocess_and_predict(ast_df, player_df, ast_scaler, ast_pca, ast_model, ast_expected_columns, ast_avg_pred)
     )
 
-    predicted_player_stats["Ast"] = format_stat(
-        preprocess_and_predict(df, player_df, ast_scaler, ast_pca, ast_model, ast_expected_columns, ast_avg_pred)
+    predicted_player_stats["TOV%"] = format_stat(
+        preprocess_and_predict(tov_df, player_df, tov_scaler, tov_pca, tov_model, tov_expected_columns, tov_avg_pred, opposite_comparison=True)
     )
 
-    predicted_player_stats["Stl"] = format_stat(
-        preprocess_and_predict(df, player_df, stl_scaler, stl_pca, stl_model, stl_expected_columns, stl_avg_pred)
+    predicted_player_stats["DRB%"] = format_stat(
+        preprocess_and_predict(drb_df, player_df, drb_scaler, drb_pca, drb_model, drb_expected_columns, drb_avg_pred)
     )
 
-    predicted_player_stats["Blk"] = format_stat(
-        preprocess_and_predict(df, player_df, blk_scaler, blk_pca, blk_model, blk_expected_columns, blk_avg_pred)
+    predicted_player_stats["STL%"] = format_stat(
+        preprocess_and_predict(stl_df, player_df, stl_scaler, stl_pca, stl_model, stl_expected_columns, stl_avg_pred)
+    )
+
+    predicted_player_stats["BLK%"] = format_stat(
+        preprocess_and_predict(blk_df, player_df, blk_scaler, blk_pca, blk_model, blk_expected_columns, blk_avg_pred)
     )
 
     predicted_player_stats["FD"] = format_stat(
-        preprocess_and_predict(df, player_df, fd_scaler, fd_pca, fd_model, fd_expected_columns, fd_avg_pred)
-    )
-
-    predicted_player_stats["Ast/TO"] = format_stat(
-        preprocess_and_predict(df, player_df, ast_to_scaler, ast_to_pca, ast_to_model, ast_to_expected_columns, ast_to_avg_pred)
+        preprocess_and_predict(fd_df, player_df, fd_scaler, fd_pca, fd_model, fd_expected_columns, fd_avg_pred)
     )
 
     predicted_player_stats["O2%"] = format_stat(
-        preprocess_and_predict(df, player_df, twoof_scaler, twoof_pca, twoof_model, twoof_expected_columns, twoof_avg_pred,opposite_comparison=True),
+        preprocess_and_predict(twoof_df, player_df, twoof_scaler, twoof_pca, twoof_model, twoof_expected_columns, twoof_avg_pred, opposite_comparison=True),
         percent=True
     )
 
     predicted_player_stats["O3%"] = format_stat(
-        preprocess_and_predict(df, player_df, threeof_scaler, threeof_pca, threeof_model, threeof_expected_columns, threeof_avg_pred,opposite_comparison=True),
+        preprocess_and_predict(threeof_df, player_df, threeof_scaler, threeof_pca, threeof_model, threeof_expected_columns, threeof_avg_pred, opposite_comparison=True),
         percent=True
     )
 
-    #EPM +
-    predicted_player_stats["OPM+"] = format_stat(
-        preprocess_and_predict(df, player_df, opm_plus_scaler, opm_plus_pca, opm_plus_model, opm_plus_expected_columns, opm_plus_avg_pred, allow_negative=True, is_bpm=True)
-    )
+    # Positional RAPM (replaces EPM+, OPM+, DPM+)
+    rapm_bundle = get_rapm_bundle()
+    pos_key = position.lower()
+    if pos_key in rapm_bundle["models"]:
+        pos_models = rapm_bundle["models"][pos_key]
+        feature_sets = rapm_bundle["feature_sets"]
+        ref_dists = rapm_bundle.get("reference_distributions", {}).get(pos_key, {})
 
-    predicted_player_stats["DPM+"] = format_stat(
-        preprocess_and_predict(df, player_df, dpm_plus_scaler, dpm_plus_pca, dpm_plus_model, dpm_plus_expected_columns, dpm_plus_avg_pred, allow_negative=True, is_bpm=True)
-    )
+        # Predict oRAPM and dRAPM
+        for target in ["oRAPM", "dRAPM"]:
+            model = pos_models[target]
+            cols = feature_sets[target]
+            for col in cols:
+                if col not in player_df.columns:
+                    player_df[col] = 0.0
+            X = player_df[cols].values
+            pred_val = float(model.predict(X)[0])
+            ref_dist = ref_dists.get(target, np.array([]))
+            if len(ref_dist) > 0:
+                pct = float(np.clip((ref_dist < pred_val).mean() * 100.0, 0.0, 100.0))
+            else:
+                pct = 50.0
+            pct_int = int(round(pct))
+            rounded_val = float(format(pred_val, ".1f")) + 0.0
 
-    # Get percentile for EPM
-    epm_plus_percentile = preprocess_and_predict(df, player_df, epm_plus_scaler, epm_plus_scaler_pca, epm_plus_scaler_model, epm_plus_scaler_expected_columns, epm_plus_scaler_avg_pred, allow_negative=True, is_bpm=True)["percentile"]
-    epm_plus_color = preprocess_and_predict(df, player_df, epm_plus_scaler, epm_plus_scaler_pca, epm_plus_scaler_model, epm_plus_scaler_expected_columns, epm_plus_scaler_avg_pred, allow_negative=True, is_bpm=True)["color"]
-    predicted_player_stats["EPM+"] = format_stat(
-        {
-            "prediction": predicted_player_stats["OPM+"]["value"] + predicted_player_stats["DPM+"]["value"],
-            "percentile": epm_plus_percentile,
-            "color": epm_plus_color
+            predicted_player_stats[target] = {
+                "value": rounded_val,
+                "percentile": pct_int,
+                "color": percentile_to_rgb(pct_int)
+            }
+
+        # Option 1: Strictly enforce RAPM = oRAPM + dRAPM for additive consistency
+        total_rapm = round(predicted_player_stats["oRAPM"]["value"] + predicted_player_stats["dRAPM"]["value"], 1) + 0.0
+        rapm_ref_dist = ref_dists.get("RAPM", np.array([]))
+        if len(rapm_ref_dist) > 0:
+            rapm_pct = float(np.clip((rapm_ref_dist < total_rapm).mean() * 100.0, 0.0, 100.0))
+        else:
+            rapm_pct = 50.0
+        rapm_pct_int = int(round(rapm_pct))
+
+        predicted_player_stats["RAPM"] = {
+            "value": total_rapm,
+            "percentile": rapm_pct_int,
+            "color": percentile_to_rgb(rapm_pct_int)
         }
-    )
 
 
     

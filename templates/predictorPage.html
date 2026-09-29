@@ -208,17 +208,21 @@
         <thead>
           <tr>
             {% for stat in stats.keys() %}
-              {% if stat == "OPM" %}
-                <th title="Offensive Plus-Minus: Measures a player's offensive impact per 100 possessions above the average player.">
+              {% if stat == "OPM" or stat == "oRAPM" %}
+                <th title="Offensive Impact (oRAPM): Measures a player's offensive impact per 100 possessions above average.">
                   {{ stat }}<span>ℹ️</span>
                 </th>
-              {% elif stat == "DPM" %}
-                <th title="Defensive Plus-Minus: Measures a player's defensive impact per 100 possessions above the average player.">
+              {% elif stat == "DPM" or stat == "dRAPM" %}
+                <th title="Defensive Impact (dRAPM): Measures a player's defensive impact per 100 possessions above average.">
                   {{ stat }}<span>ℹ️</span>
                 </th>
-              {% elif stat == "EPM" %}
-                <th title="Estimated Plus-Minus: Measures a player's total impact per 100 possessions above the average player.">
+              {% elif stat == "EPM" or stat == "RAPM" %}
+                <th title="Total Impact (RAPM): Regularized Adjusted Plus-Minus per 100 possessions above average.">
                   {{ stat }}<span>ℹ️</span>
+                </th>
+              {% elif stat == "TOV%" %}
+                <th title="Turnover Percentage (TOV%): Lower turnover rate yields a higher percentile.">
+                  {{ stat }}
                 </th>
               {% else %}
                 <th>{{ stat }}</th>
@@ -246,8 +250,7 @@
         </tbody>
         
       </table>
-      <p>Per 56 Poss</p>
-      
+      <p>Positional Rate Statistics &amp; RAPM</p>
       
       <a href="{{ url_for('home') }}" class="home-button">Home</a>
       
